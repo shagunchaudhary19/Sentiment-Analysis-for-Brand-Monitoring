@@ -1,0 +1,1328 @@
+[
+  {
+    "id":"1",
+    "brand":"Apple",
+    "text":"This product is absolutely amazing! I love it.",
+    "author":"User A",
+    "published_at":"2023-10-01",
+    "channel":"youtube",
+    "reach":150,
+    "normalized_text":"this product is absolutely amazing! i love it.",
+    "processed_text":"product absolutely amazing love",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.8615,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"2",
+    "brand":"Apple",
+    "text":"Terrible experience. It broke after two days.",
+    "author":"User B",
+    "published_at":"2023-10-02",
+    "channel":"youtube",
+    "reach":20,
+    "normalized_text":"terrible experience. it broke after two days.",
+    "processed_text":"terrible experience break day",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.4767,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"3",
+    "brand":"Apple",
+    "text":"Honestly, it's just okay. Nothing special but gets the job done.",
+    "author":"User C",
+    "published_at":"2023-10-03",
+    "channel":"youtube",
+    "reach":5,
+    "normalized_text":"honestly, it's just okay. nothing special but gets the job done.",
+    "processed_text":"honestly okay special get job",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.765,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"4",
+    "brand":"Apple",
+    "text":"Best purchase I've made this year. Highly recommend!",
+    "author":"User D",
+    "published_at":"2023-10-04",
+    "channel":"youtube",
+    "reach":500,
+    "normalized_text":"best purchase i've made this year. highly recommend!",
+    "processed_text":"good purchase year highly recommend",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.6901,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"5",
+    "brand":"Apple",
+    "text":"Don't buy this, total waste of money.",
+    "author":"User E",
+    "published_at":"2023-10-05",
+    "channel":"youtube",
+    "reach":12,
+    "normalized_text":"don't buy this, total waste of money.",
+    "processed_text":"buy total waste money",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.4754,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1pw9thg",
+    "brand":"Apple",
+    "text":"Leaker Who Apple Is Suing Says 'Screw It,' Here's the Foldable iPhone Early ",
+    "author":"dapperlemon",
+    "published_at":"1766770228.0",
+    "channel":"reddit",
+    "reach":20141,
+    "normalized_text":"leaker who apple is suing says 'screw it,' here's the foldable iphone early",
+    "processed_text":"leaker apple sue say screw foldable iphone early",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.1027,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1ouvaqe",
+    "brand":"Apple",
+    "text":"J.P. Morgan calls out AI spend, says $650 billion in annual revenue required to deliver mere 10% return on AI buildout \u2014 equivalent to $35 payment from every iPhone user, or $180 from every Netflix subscriber 'in perpetuity' ",
+    "author":"ControlCAD",
+    "published_at":"1762920492.0",
+    "channel":"reddit",
+    "reach":27940,
+    "normalized_text":"j.p. morgan calls out ai spend, says 650 billion in annual revenue required to deliver mere 10 return on ai buildout equivalent to 35 payment from every iphone user, or 180 from every netflix subscriber 'in perpetuity'",
+    "processed_text":"j.p morgan call ai spend say 650 billion annual revenue require deliver mere 10 return ai buildout equivalent 35 payment iphone user 180 netflix subscriber perpetuity",
+    "named_entities":"['j.p.', 'morgan', 'netflix']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1qkwi69",
+    "brand":"Apple",
+    "text":"'Hey, I'm dying': Decorated Marine texts family goodbye after teens gun him down during Facebook Marketplace 'ruse' to steal his iPhone and sell it at Walmart ecoATM, cops say ",
+    "author":"Forward-Answer-4407",
+    "published_at":"1769188074.0",
+    "channel":"reddit",
+    "reach":9271,
+    "normalized_text":"'hey, i'm dying' decorated marine texts family goodbye after teens gun him down during facebook marketplace 'ruse' to steal his iphone and sell it at walmart ecoatm, cops say",
+    "processed_text":"hey die decorate marine text family goodbye teen gun facebook marketplace ruse steal iphone sell walmart ecoatm cop",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.8591,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1mjs96c",
+    "brand":"Apple",
+    "text":"Apple made a 24k gold and glass statue for Donald Trump.  At a White House press conference to discuss Apple\u2019s new US manufacturing plans, CEO Tim Cook presented a gift to President Donald Trump: a \u201cunique\u201d piece of glass from iPhone glass manufacturer Corning that\u2019s set in a 24-karat gold base. ",
+    "author":"esporx",
+    "published_at":"1754546663.0",
+    "channel":"reddit",
+    "reach":27535,
+    "normalized_text":"apple made a 24k gold and glass statue for donald trump. at a white house press conference to discuss apples new us manufacturing plans, ceo tim cook presented a gift to president donald trump a unique piece of glass from iphone glass manufacturer corning thats set in a 24karat gold base.",
+    "processed_text":"apple 24k gold glass statue donald trump white house press conference discuss apple new manufacturing plan ceo tim cook present gift president donald trump unique piece glass iphone glass manufacturer corn s set 24karat gold base",
+    "named_entities":"['apple', 'donald trump', 'a white house', 'tim cook', 'donald trump']",
+    "vader_label":"positive",
+    "vader_score":0.4404,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1qx4oo5",
+    "brand":"Apple",
+    "text":"FBI Couldn\u2019t Get into WaPo Reporter\u2019s iPhone Because It Had Lockdown Mode Enabled ",
+    "author":"mepper",
+    "published_at":"1770343094.0",
+    "channel":"reddit",
+    "reach":11632,
+    "normalized_text":"fbi couldnt get into wapo reporters iphone because it had lockdown mode enabled",
+    "processed_text":"fbi not wapo reporter iphone lockdown mode enable",
+    "named_entities":"['fbi']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1oujdjv",
+    "brand":"Apple",
+    "text":"Apple unveils $229 iPhone Pocket described as 'a piece of cloth' ",
+    "author":"Power-Equality",
+    "published_at":"1762890336.0",
+    "channel":"reddit",
+    "reach":6720,
+    "normalized_text":"apple unveils 229 iphone pocket described as 'a piece of cloth'",
+    "processed_text":"apple unveil 229 iphone pocket describe piece cloth",
+    "named_entities":"['apple']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1lcyo3x",
+    "brand":"Apple",
+    "text":"I Tried Pre-Ordering the Trump Phone. The Page Failed and It Charged My Credit Card the Wrong Amount ",
+    "author":"mepper",
+    "published_at":"1750094162.0",
+    "channel":"reddit",
+    "reach":26472,
+    "normalized_text":"i tried preordering the trump phone. the page failed and it charged my credit card the wrong amount",
+    "processed_text":"try preordere trump phone page fail charge credit card wrong",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.6124,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1jv0xw1",
+    "brand":"Apple",
+    "text":"Trump believes iPhones can be made in the US, says White House ",
+    "author":"SquidFistHK",
+    "published_at":"1744187780.0",
+    "channel":"reddit",
+    "reach":26739,
+    "normalized_text":"trump believes iphones can be made in the us, says white house",
+    "processed_text":"trump believe iphone say white house",
+    "named_entities":"['us', 'white house']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1otrogc",
+    "brand":"Apple",
+    "text":"iPhone Air sales are so bad that Apple's delaying the next-generation version scheduled to come out alongside the iPhone 18 Pro ",
+    "author":"ControlCAD",
+    "published_at":"1762812654.0",
+    "channel":"reddit",
+    "reach":5126,
+    "normalized_text":"iphone air sales are so bad that apple's delaying the nextgeneration version scheduled to come out alongside the iphone 18 pro",
+    "processed_text":"iphone air sale bad apple delay nextgeneration version schedule come alongside iphone 18 pro",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.7003,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1hfl24t",
+    "brand":"Apple",
+    "text":"Most iPhone owners see little to no value in Apple Intelligence so far ",
+    "author":"polimeema",
+    "published_at":"1734361425.0",
+    "channel":"reddit",
+    "reach":32284,
+    "normalized_text":"most iphone owners see little to no value in apple intelligence so far",
+    "processed_text":"iphone owner little value apple intelligence far",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.6051,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1riy03x",
+    "brand":"Apple",
+    "text":"Apple introduces iPhone 17e ",
+    "author":"gdelacalle",
+    "published_at":"1772470049.0",
+    "channel":"reddit",
+    "reach":2869,
+    "normalized_text":"apple introduces iphone 17e",
+    "processed_text":"apple introduce iphone 17e",
+    "named_entities":"['apple']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1r8m4he",
+    "brand":"Apple",
+    "text":"You can jailbreak an F-35 just like an iPhone, says Dutch defense chief ",
+    "author":"Logical_Welder3467",
+    "published_at":"1771465467.0",
+    "channel":"reddit",
+    "reach":3995,
+    "normalized_text":"you can jailbreak an f35 just like an iphone, says dutch defense chief",
+    "processed_text":"jailbreak f35 like iphone say dutch defense chief",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.4588,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1jukkpp",
+    "brand":"Apple",
+    "text":"Apple is racing to fly planes of iPhones into the US ahead of Trump\u2019s tariffs ",
+    "author":"lurker_bee",
+    "published_at":"1744136385.0",
+    "channel":"reddit",
+    "reach":17711,
+    "normalized_text":"apple is racing to fly planes of iphones into the us ahead of trumps tariffs",
+    "processed_text":"apple race fly plane iphone ahead trump tariff",
+    "named_entities":"['apple', 'us', 'trumps tariffs']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1fk2fbz",
+    "brand":"Apple",
+    "text":"Apple iPhone 16 demand is so weak that employees can already buy it on discount ",
+    "author":"lurker_bee",
+    "published_at":"1726690437.0",
+    "channel":"reddit",
+    "reach":21856,
+    "normalized_text":"apple iphone 16 demand is so weak that employees can already buy it on discount",
+    "processed_text":"apple iphone 16 demand weak employee buy discount",
+    "named_entities":"['apple']",
+    "vader_label":"negative",
+    "vader_score":-0.5267,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1kn4hir",
+    "brand":"Apple",
+    "text":"Trump Tells Tim Cook to Stop Building iPhones in India ",
+    "author":"chrisdh79",
+    "published_at":"1747303504.0",
+    "channel":"reddit",
+    "reach":8306,
+    "normalized_text":"trump tells tim cook to stop building iphones in india",
+    "processed_text":"trump tell tim cook stop build iphone india",
+    "named_entities":"['tim cook', 'india']",
+    "vader_label":"negative",
+    "vader_score":-0.296,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1h65xqm",
+    "brand":"Apple",
+    "text":"FBI Warns iPhone And Android Users\u2014Stop Sending Texts ",
+    "author":"lurker_bee",
+    "published_at":"1733280914.0",
+    "channel":"reddit",
+    "reach":12523,
+    "normalized_text":"fbi warns iphone and android usersstop sending texts",
+    "processed_text":"fbi warn iphone android usersstop send text",
+    "named_entities":"['fbi', 'android']",
+    "vader_label":"negative",
+    "vader_score":-0.1027,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1jrcrkn",
+    "brand":"Apple",
+    "text":"Trump Tariffs Could Triple iPhone Price to $3,500, Threatening AI Progress ",
+    "author":"Appropriate_Rain_770",
+    "published_at":"1743775702.0",
+    "channel":"reddit",
+    "reach":6600,
+    "normalized_text":"trump tariffs could triple iphone price to 3,500, threatening ai progress",
+    "processed_text":"trump tariff triple iphone price 3,500 threaten ai progress",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.0516,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1odjv08",
+    "brand":"Apple",
+    "text":"Apple is 'drastically' cutting iPhone Air production, report says, after new survey reveals 'virtually no demand' | Fortune ",
+    "author":"Arthur_Morgan44469",
+    "published_at":"1761165592.0",
+    "channel":"reddit",
+    "reach":2422,
+    "normalized_text":"apple is 'drastically' cutting iphone air production, report says, after new survey reveals 'virtually no demand' fortune",
+    "processed_text":"apple drastically cut iphone air production report say new survey reveal virtually demand fortune",
+    "named_entities":"['apple']",
+    "vader_label":"negative",
+    "vader_score":-0.3818,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1j6i9jb",
+    "brand":"Apple",
+    "text":"New survey suggests the vast majority of iPhone and Samsung Galaxy users find AI useless \u2013 and I\u2019m not surprised ",
+    "author":"lurker_bee",
+    "published_at":"1741444008.0",
+    "channel":"reddit",
+    "reach":8328,
+    "normalized_text":"new survey suggests the vast majority of iphone and samsung galaxy users find ai useless and im not surprised",
+    "processed_text":"new survey suggest vast majority iphone samsung galaxy user find ai useless m surprised",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.2263,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1hjkana",
+    "brand":"Apple",
+    "text":"AirPods sales totaled over $18 billion last year, more than all of Nintendo | Earbuds likely to become Apple's 3rd biggest product behind iPhone and Mac ",
+    "author":"chrisdh79",
+    "published_at":"1734818494.0",
+    "channel":"reddit",
+    "reach":6778,
+    "normalized_text":"airpods sales totaled over 18 billion last year, more than all of nintendo earbuds likely to become apple's 3rd biggest product behind iphone and mac",
+    "processed_text":"airpods sale total 18 billion year nintendo earbuds likely apple 3rd big product iphone mac",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1itztow",
+    "brand":"Apple",
+    "text":"Trump's tariffs could drive up iPhone prices by about 10% ",
+    "author":"chrisdh79",
+    "published_at":"1740061978.0",
+    "channel":"reddit",
+    "reach":7788,
+    "normalized_text":"trump's tariffs could drive up iphone prices by about 10",
+    "processed_text":"trump tariff drive iphone price 10",
+    "named_entities":"['trump']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1q199a0",
+    "brand":"Apple",
+    "text":"No iPhone 18 Launch This Year, Reports Suggest ",
+    "author":"jd5547561",
+    "published_at":"1767287646.0",
+    "channel":"reddit",
+    "reach":2192,
+    "normalized_text":"no iphone 18 launch this year, reports suggest",
+    "processed_text":"iphone 18 launch year report suggest",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"16gyhz0",
+    "brand":"Apple",
+    "text":"Apple forced to ditch iPhone lightning charger ",
+    "author":"zmlos",
+    "published_at":"1694542167.0",
+    "channel":"reddit",
+    "reach":23370,
+    "normalized_text":"apple forced to ditch iphone lightning charger",
+    "processed_text":"apple force ditch iphone lightning charger",
+    "named_entities":"['apple']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1ldcmfg",
+    "brand":"Apple",
+    "text":"Trump Mobile's made-in-US iPhone 17 competitor is really made in China ",
+    "author":"IRideMoreThanYou",
+    "published_at":"1750129739.0",
+    "channel":"reddit",
+    "reach":6894,
+    "normalized_text":"trump mobile's madeinus iphone 17 competitor is really made in china",
+    "processed_text":"trump mobile madeinus iphone 17 competitor china",
+    "named_entities":"[\"trump mobile's\", 'china']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1o9k6ir",
+    "brand":"Apple",
+    "text":"Apple Said to Cut iPhone Air Production Amid Underwhelming Sales ",
+    "author":"ControlCAD",
+    "published_at":"1760754417.0",
+    "channel":"reddit",
+    "reach":1936,
+    "normalized_text":"apple said to cut iphone air production amid underwhelming sales",
+    "processed_text":"apple say cut iphone air production amid underwhelme sale",
+    "named_entities":"['apple']",
+    "vader_label":"negative",
+    "vader_score":-0.2732,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1nua1po",
+    "brand":"Samsung",
+    "text":"Samsung Galaxy Ring swells and crushes user's finger, causing missed flight and hospital visit ",
+    "author":"chrisdh79",
+    "published_at":"1759229835.0",
+    "channel":"reddit",
+    "reach":11803,
+    "normalized_text":"samsung galaxy ring swells and crushes user's finger, causing missed flight and hospital visit",
+    "processed_text":"samsung galaxy ring swell crush user finger cause miss flight hospital visit",
+    "named_entities":"['samsung']",
+    "vader_label":"negative",
+    "vader_score":-0.296,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1ozl43r",
+    "brand":"Samsung",
+    "text":"Unremovable Spyware on Samsung Devices Comes Pre-installed on Galaxy Series Devices ",
+    "author":"Arthur_Morgan44469",
+    "published_at":"1763397589.0",
+    "channel":"reddit",
+    "reach":5975,
+    "normalized_text":"unremovable spyware on samsung devices comes preinstalled on galaxy series devices",
+    "processed_text":"unremovable spyware samsung device comes preinstalle galaxy series device",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1kc9zvt",
+    "brand":"Samsung",
+    "text":"Nobody\u2019s Asking for Unnecessarily Skinny iPhones or Samsung Galaxy Phones ",
+    "author":"chrisdh79",
+    "published_at":"1746109439.0",
+    "channel":"reddit",
+    "reach":2456,
+    "normalized_text":"nobodys asking for unnecessarily skinny iphones or samsung galaxy phones",
+    "processed_text":"nobodys ask unnecessarily skinny iphone samsung galaxy phone",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"wnb49z",
+    "brand":"Samsung",
+    "text":"In a single month, the James Webb Space Telescope has seen the oldest galaxies, messy cosmic collisions, and a hot gas planet's atmosphere ",
+    "author":"BohemianBella",
+    "published_at":"1660385750.0",
+    "channel":"reddit",
+    "reach":15610,
+    "normalized_text":"in a single month, the james webb space telescope has seen the oldest galaxies, messy cosmic collisions, and a hot gas planet's atmosphere",
+    "processed_text":"single month james webb space telescope see old galaxy messy cosmic collision hot gas planet atmosphere",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.6124,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"560mp3",
+    "brand":"Samsung",
+    "text":"Replacement Samsung Galaxy Note 7 phone catches fire on Southwest plane ",
+    "author":"MoltenSlowa",
+    "published_at":"1475688201.0",
+    "channel":"reddit",
+    "reach":13171,
+    "normalized_text":"replacement samsung galaxy note 7 phone catches fire on southwest plane",
+    "processed_text":"replacement samsung galaxy note 7 phone catch fire southwest plane",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.34,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"52e4hm",
+    "brand":"Samsung",
+    "text":"Six-year old boy gets burned when a Samsung Galaxy Note 7 explodes in his hand ",
+    "author":"rkkim",
+    "published_at":"1473683974.0",
+    "channel":"reddit",
+    "reach":10406,
+    "normalized_text":"sixyear old boy gets burned when a samsung galaxy note 7 explodes in his hand",
+    "processed_text":"sixyear old boy get burn samsung galaxy note 7 explode hand",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.4939,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"56x9o6",
+    "brand":"Samsung",
+    "text":"Samsung permanently discontinues Galaxy Note 7 smartphone ",
+    "author":"alanwong",
+    "published_at":"1476179484.0",
+    "channel":"reddit",
+    "reach":9976,
+    "normalized_text":"samsung permanently discontinues galaxy note 7 smartphone",
+    "processed_text":"samsung permanently discontinue galaxy note 7 smartphone",
+    "named_entities":"['samsung']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1mho20o",
+    "brand":"Samsung",
+    "text":"A YouTuber is live-folding the Samsung Galaxy Z Fold 200,000 times. Will it hold up? ",
+    "author":"ErinDotEngineer",
+    "published_at":"1754337689.0",
+    "channel":"reddit",
+    "reach":1448,
+    "normalized_text":"a youtuber is livefolding the samsung galaxy z fold 200,000 times. will it hold up?",
+    "processed_text":"youtuber livefolde samsung galaxy z fold 200,000 time hold",
+    "named_entities":"['samsung']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"4s62co",
+    "brand":"Samsung",
+    "text":"Samsung Galaxy S7 Active Isn\u2019t Actually Waterproof, Says Consumer Reports ",
+    "author":"dudzman",
+    "published_at":"1468167020.0",
+    "channel":"reddit",
+    "reach":10667,
+    "normalized_text":"samsung galaxy s7 active isnt actually waterproof, says consumer reports",
+    "processed_text":"samsung galaxy s7 active not actually waterproof say consumer report",
+    "named_entities":"['samsung']",
+    "vader_label":"positive",
+    "vader_score":0.4019,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"3h0ouo",
+    "brand":"Samsung",
+    "text":"The biggest cell phone ripoff: $100 for 32 GB of storage -- \"The flash storage drives installed in the iPhone 6 cost Apple just $7.55 per 16 GB, according to TechInsights, a patent consultant that performs gadget tear-downs. The 32 GB of storage included the Galaxy S6 costs Samsung $14.50\" ",
+    "author":"mepper",
+    "published_at":"1439583605.0",
+    "channel":"reddit",
+    "reach":8420,
+    "normalized_text":"the biggest cell phone ripoff 100 for 32 gb of storage \"the flash storage drives installed in the iphone 6 cost apple just 7.55 per 16 gb, according to techinsights, a patent consultant that performs gadget teardowns. the 32 gb of storage included the galaxy s6 costs samsung 14.50\"",
+    "processed_text":"big cell phone ripoff 100 32 gb storage flash storage drive instal iphone 6 cost apple 7.55 16 gb accord techinsight patent consultant perform gadget teardown 32 gb storage include galaxy s6 cost samsung 14.50",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1lavfty",
+    "brand":"Samsung",
+    "text":"More than 800,000 galaxies in the darkness \u2015 James Webb announces historic discovery out of Milky Way ",
+    "author":"upyoars",
+    "published_at":"1749860571.0",
+    "channel":"reddit",
+    "reach":2322,
+    "normalized_text":"more than 800,000 galaxies in the darkness james webb announces historic discovery out of milky way",
+    "processed_text":"800,000 galaxy darkness james webb announce historic discovery milky way",
+    "named_entities":"['james webb']",
+    "vader_label":"negative",
+    "vader_score":-0.25,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"32uaan",
+    "brand":"Samsung",
+    "text":"Apple is worried Samsung won't make enough chips for the iPhone because the Galaxy S6 is suddenly doing better than expected ",
+    "author":"canausernamebetoolon",
+    "published_at":"1429213136.0",
+    "channel":"reddit",
+    "reach":10452,
+    "normalized_text":"apple is worried samsung won't make enough chips for the iphone because the galaxy s6 is suddenly doing better than expected",
+    "processed_text":"apple worried samsung will chip iphone galaxy s6 suddenly well expect",
+    "named_entities":"['apple']",
+    "vader_label":"neutral",
+    "vader_score":-0.0258,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"10vfe06",
+    "brand":"Samsung",
+    "text":"Bloatware pushes the Galaxy S23 Android OS to an incredible 60GB ",
+    "author":"bdzz",
+    "published_at":"1675711232.0",
+    "channel":"reddit",
+    "reach":2537,
+    "normalized_text":"bloatware pushes the galaxy s23 android os to an incredible 60gb",
+    "processed_text":"bloatware push galaxy s23 android os incredible 60 gb",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"56gvr7",
+    "brand":"Samsung",
+    "text":"Replaced Galaxy Note 7 explodes in Taiwan ",
+    "author":"asoksevil",
+    "published_at":"1475932206.0",
+    "channel":"reddit",
+    "reach":6696,
+    "normalized_text":"replaced galaxy note 7 explodes in taiwan",
+    "processed_text":"replace galaxy note 7 explode taiwan",
+    "named_entities":"['taiwan']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"54irva",
+    "brand":"Samsung",
+    "text":"China's newest and largest radio telescope is operational as of today. It will be used to search for gravitational waves, detect radio emissions from stars and galaxies and listen for signs of intelligent extraterrestrial life. ",
+    "author":"asusoverclocked",
+    "published_at":"1474860679.0",
+    "channel":"reddit",
+    "reach":13027,
+    "normalized_text":"china's newest and largest radio telescope is operational as of today. it will be used to search for gravitational waves, detect radio emissions from stars and galaxies and listen for signs of intelligent extraterrestrial life.",
+    "processed_text":"china new large radio telescope operational today search gravitational wave detect radio emission star galaxy listen sign intelligent extraterrestrial life",
+    "named_entities":"['china']",
+    "vader_label":"positive",
+    "vader_score":0.4588,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"522e9y",
+    "brand":"Samsung",
+    "text":"Florida man's vehicle catches fire after charging Galaxy Note 7 explodes | Fox News ",
+    "author":"Jadehamnett",
+    "published_at":"1473499711.0",
+    "channel":"reddit",
+    "reach":5848,
+    "normalized_text":"florida man's vehicle catches fire after charging galaxy note 7 explodes fox news",
+    "processed_text":"florida man vehicle catch fire charge galaxy note 7 explode fox news",
+    "named_entities":"['florida']",
+    "vader_label":"negative",
+    "vader_score":-0.34,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1sl63d",
+    "brand":"Samsung",
+    "text":"Nokia offering Lumia to Samsung owner who's Galaxy S4 caught fire. ",
+    "author":"Zyoneatslyons",
+    "published_at":"1386717456.0",
+    "channel":"reddit",
+    "reach":2795,
+    "normalized_text":"nokia offering lumia to samsung owner who's galaxy s4 caught fire.",
+    "processed_text":"nokia offer lumia samsung owner galaxy s4 catch fire",
+    "named_entities":"['nokia']",
+    "vader_label":"negative",
+    "vader_score":-0.34,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"woehll",
+    "brand":"Samsung",
+    "text":"Xiaomi clones the Galaxy Fold, makes it 40% thinner, adds a bigger battery ",
+    "author":"maybenot12",
+    "published_at":"1660505224.0",
+    "channel":"reddit",
+    "reach":2147,
+    "normalized_text":"xiaomi clones the galaxy fold, makes it 40 thinner, adds a bigger battery",
+    "processed_text":"xiaomi clone galaxy fold make 40 thin add big battery",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"s1c0fy",
+    "brand":"Samsung",
+    "text":"Astronomers discover a strange galaxy without dark matter ",
+    "author":"atiteloviadeci",
+    "published_at":"1641904877.0",
+    "channel":"reddit",
+    "reach":2176,
+    "normalized_text":"astronomers discover a strange galaxy without dark matter",
+    "processed_text":"astronomer discover strange galaxy dark matter",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.1779,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"2012gc",
+    "brand":"Samsung",
+    "text":"The BBC has released a 30th anniversary edition of the Hitchhiker's Guide to the Galaxy text adventure ",
+    "author":"kjbakash",
+    "published_at":"1394432479.0",
+    "channel":"reddit",
+    "reach":3195,
+    "normalized_text":"the bbc has released a 30th anniversary edition of the hitchhiker's guide to the galaxy text adventure",
+    "processed_text":"bbc release 30th anniversary edition hitchhiker guide galaxy text adventure",
+    "named_entities":"['bbc']",
+    "vader_label":"positive",
+    "vader_score":0.3182,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"105a8z",
+    "brand":"Samsung",
+    "text":"Samsung mocks iPhone 5 line sitters (again) in new Galaxy S III ad. ",
+    "author":"spsheridan",
+    "published_at":"1348077239.0",
+    "channel":"reddit",
+    "reach":1834,
+    "normalized_text":"samsung mocks iphone 5 line sitters again in new galaxy s iii ad.",
+    "processed_text":"samsung mocks iphone 5 line sitter new galaxy s iii ad",
+    "named_entities":"['samsung', 's iii']",
+    "vader_label":"negative",
+    "vader_score":-0.4588,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"w9mee",
+    "brand":"Samsung",
+    "text":"Samsung Galaxy Tab doesn't copy Apple designs, UK court rules ",
+    "author":"appydays",
+    "published_at":"1341835276.0",
+    "channel":"reddit",
+    "reach":2163,
+    "normalized_text":"samsung galaxy tab doesn't copy apple designs, uk court rules",
+    "processed_text":"samsung galaxy tab copy apple design uk court rule",
+    "named_entities":"['samsung', 'uk court']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"52dyjr",
+    "brand":"Samsung",
+    "text":"Samsung may remotely kill all unreturned Galaxy Note 7's ",
+    "author":"golden430",
+    "published_at":"1473681497.0",
+    "channel":"reddit",
+    "reach":2097,
+    "normalized_text":"samsung may remotely kill all unreturned galaxy note 7's",
+    "processed_text":"samsung remotely kill unreturned galaxy note 7",
+    "named_entities":"['samsung']",
+    "vader_label":"negative",
+    "vader_score":-0.6908,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"10vyoy",
+    "brand":"Samsung",
+    "text":"\nSamsung Galaxy S III sales haven\u2019t been hurt one bit since loss to Apple in patent trial.. In fact, they have increased. ",
+    "author":"ItchyPickle",
+    "published_at":"1349288501.0",
+    "channel":"reddit",
+    "reach":1892,
+    "normalized_text":"samsung galaxy s iii sales havent been hurt one bit since loss to apple in patent trial.. in fact, they have increased.",
+    "processed_text":"samsung galaxy s iii sale not hurt bit loss apple patent trial fact increase",
+    "named_entities":"['samsung']",
+    "vader_label":"positive",
+    "vader_score":0.7217,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1pkncxz",
+    "brand":"Google",
+    "text":"Man arrested for allegedly wiping his Google Pixel before a CBP search ",
+    "author":"aacool",
+    "published_at":"1765530255.0",
+    "channel":"reddit",
+    "reach":3349,
+    "normalized_text":"man arrested for allegedly wiping his google pixel before a cbp search",
+    "processed_text":"man arrest allegedly wipe google pixel cbp search",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.34,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1045tef",
+    "brand":"Google",
+    "text":"Massive Google billboard ad tells Apple to fix 'pixelated' photos and videos in texts between iPhones and Androids ",
+    "author":"777fer",
+    "published_at":"1672942476.0",
+    "channel":"reddit",
+    "reach":31525,
+    "normalized_text":"massive google billboard ad tells apple to fix 'pixelated' photos and videos in texts between iphones and androids",
+    "processed_text":"massive google billboard ad tell apple fix pixelate photo video text iphone android",
+    "named_entities":"['google']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1lydz5o",
+    "brand":"Google",
+    "text":"Cops say criminals use a Google Pixel with GrapheneOS \u2014 I say that\u2019s freedom ",
+    "author":"AzuleEyes",
+    "published_at":"1752362232.0",
+    "channel":"reddit",
+    "reach":4436,
+    "normalized_text":"cops say criminals use a google pixel with grapheneos i say thats freedom",
+    "processed_text":"cop criminal use google pixel grapheneo s freedom",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.2023,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"16kbcu9",
+    "brand":"Google",
+    "text":"Google says it can\u2019t fix Pixel Watches, please just buy a new one | With no official repair program and no parts, broken Pixel Watches are just e-waste. ",
+    "author":"chrisdh79",
+    "published_at":"1694880844.0",
+    "channel":"reddit",
+    "reach":12675,
+    "normalized_text":"google says it cant fix pixel watches, please just buy a new one with no official repair program and no parts, broken pixel watches are just ewaste.",
+    "processed_text":"google say not fix pixel watch buy new official repair program part break pixel watch ewaste",
+    "named_entities":"['google']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"185wly9",
+    "brand":"Google",
+    "text":"Google says bumpy Pixel 8 screens are nothing to worry about \u2014 Display \u2018bumps\u2019 are components pushing into the OLED panel ",
+    "author":"marketrent",
+    "published_at":"1701179768.0",
+    "channel":"reddit",
+    "reach":6573,
+    "normalized_text":"google says bumpy pixel 8 screens are nothing to worry about display bumps are components pushing into the oled panel",
+    "processed_text":"google say bumpy pixel 8 screen worry display bump component push oled panel",
+    "named_entities":"['google']",
+    "vader_label":"negative",
+    "vader_score":-0.4404,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"7888b1",
+    "brand":"Google",
+    "text":"Two-week-old Pixel 2 XL displays are already showing burn-in ",
+    "author":"Abscess2",
+    "published_at":"1508770395.0",
+    "channel":"reddit",
+    "reach":22669,
+    "normalized_text":"twoweekold pixel 2 xl displays are already showing burnin",
+    "processed_text":"twoweekold pixel 2 xl display show burnin",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"i930vg",
+    "brand":"Google",
+    "text":"Russell Kirsch, inventor of the pixel, dies in his Portland home at age 91 ",
+    "author":"giuliomagnifico",
+    "published_at":"1597335917.0",
+    "channel":"reddit",
+    "reach":44341,
+    "normalized_text":"russell kirsch, inventor of the pixel, dies in his portland home at age 91",
+    "processed_text":"russell kirsch inventor pixel die portland home age 91",
+    "named_entities":"['russell kirsch']",
+    "vader_label":"negative",
+    "vader_score":-0.5994,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1eu0mbt",
+    "brand":"Google",
+    "text":"Google threatened tech influencers unless they \u2018preferred\u2019 the Pixel ",
+    "author":"marketrent",
+    "published_at":"1723844049.0",
+    "channel":"reddit",
+    "reach":2693,
+    "normalized_text":"google threatened tech influencers unless they preferred the pixel",
+    "processed_text":"google threaten tech influencer prefer pixel",
+    "named_entities":"['google']",
+    "vader_label":"negative",
+    "vader_score":-0.3818,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"16s1s4q",
+    "brand":"Google",
+    "text":"Pixel 8 leak promises 7 years of OS updates\u2014even more than an iPhone ",
+    "author":"chrisdh79",
+    "published_at":"1695670991.0",
+    "channel":"reddit",
+    "reach":2756,
+    "normalized_text":"pixel 8 leak promises 7 years of os updateseven more than an iphone",
+    "processed_text":"pixel 8 leak promise 7 year os updateseven iphone",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":-0.0258,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"4qwp0r",
+    "brand":"Google",
+    "text":"Google Maps removes clouds, clears up view in 700-trillion pixel upgrade ",
+    "author":"Skenderbeio",
+    "published_at":"1467454073.0",
+    "channel":"reddit",
+    "reach":12434,
+    "normalized_text":"google maps removes clouds, clears up view in 700trillion pixel upgrade",
+    "processed_text":"google maps remove cloud clear view 700trillion pixel upgrade",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.3818,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1hoe338",
+    "brand":"Google",
+    "text":"Apple Vision Pro gets extraordinary $30,000 dual-lens camera that can handle almost 118 million pixels | Blackmagic's new camera can capture Apple Immersive Video ",
+    "author":"ControlCAD",
+    "published_at":"1735416584.0",
+    "channel":"reddit",
+    "reach":1463,
+    "normalized_text":"apple vision pro gets extraordinary 30,000 duallens camera that can handle almost 118 million pixels blackmagic's new camera can capture apple immersive video",
+    "processed_text":"apple vision pro get extraordinary 30,000 duallen camera handle 118 million pixel blackmagic new camera capture apple immersive video",
+    "named_entities":"['apple', \"pixels blackmagic's\"]",
+    "vader_label":"positive",
+    "vader_score":0.25,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"z83h53",
+    "brand":"Google",
+    "text":"Google has to pay $9.4 million because it paid people to say they liked the Pixel 4 ",
+    "author":"RunOrDieTrying",
+    "published_at":"1669750119.0",
+    "channel":"reddit",
+    "reach":3292,
+    "normalized_text":"google has to pay 9.4 million because it paid people to say they liked the pixel 4",
+    "processed_text":"google pay 9.4 million pay people like pixel 4",
+    "named_entities":"['google']",
+    "vader_label":"positive",
+    "vader_score":0.1779,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"16tj07p",
+    "brand":"Google",
+    "text":"GPUs from all major suppliers are vulnerable to new pixel-stealing attack ",
+    "author":"donnygel",
+    "published_at":"1695817035.0",
+    "channel":"reddit",
+    "reach":2097,
+    "normalized_text":"gpus from all major suppliers are vulnerable to new pixelstealing attack",
+    "processed_text":"gpu major supplier vulnerable new pixelstealing attack",
+    "named_entities":"['gpus']",
+    "vader_label":"negative",
+    "vader_score":-0.6461,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"z82i3a",
+    "brand":"Google",
+    "text":"Influencers were paid by Google to promote a Pixel phone they never used | The FTC says Google paid radio DJs to say they loved the Pixel 4. ",
+    "author":"chrisdh79",
+    "published_at":"1669747944.0",
+    "channel":"reddit",
+    "reach":1637,
+    "normalized_text":"influencers were paid by google to promote a pixel phone they never used the ftc says google paid radio djs to say they loved the pixel 4.",
+    "processed_text":"influencer pay google promote pixel phone ftc say google pay radio djs love pixel 4",
+    "named_entities":"['google']",
+    "vader_label":"positive",
+    "vader_score":0.7184,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"2fjswm",
+    "brand":"Google",
+    "text":"If the moon were only 1 pixel... a map of the solar system with all the space left in. ",
+    "author":"IAMSpirituality",
+    "published_at":"1409925185.0",
+    "channel":"reddit",
+    "reach":3331,
+    "normalized_text":"if the moon were only 1 pixel... a map of the solar system with all the space left in.",
+    "processed_text":"moon 1 pixel map solar system space leave",
+    "named_entities":"[]",
+    "vader_label":"negative",
+    "vader_score":-0.0516,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1ersvmm",
+    "brand":"Google",
+    "text":"Gemini is replacing Google Assistant on Pixel phones, and it\u2019s a trainwreck ",
+    "author":"lurker_bee",
+    "published_at":"1723610703.0",
+    "channel":"reddit",
+    "reach":854,
+    "normalized_text":"gemini is replacing google assistant on pixel phones, and its a trainwreck",
+    "processed_text":"gemini replace google assistant pixel phone trainwreck",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"hjqfw",
+    "brand":"Google",
+    "text":"Two researchers have successfully created an algorithm that depixelizes and upscales low-resolution 8-bit \"pixel art\" into lush vector graphics. ",
+    "author":"scientologist2",
+    "published_at":"1306327031.0",
+    "channel":"reddit",
+    "reach":1881,
+    "normalized_text":"two researchers have successfully created an algorithm that depixelizes and upscales lowresolution 8bit \"pixel art\" into lush vector graphics.",
+    "processed_text":"researcher successfully create algorithm depixelize upscale lowresolution 8bit pixel art lush vector graphic",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.6486,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"18ywv9",
+    "brand":"Google",
+    "text":"Google announces Chromebook Pixel: a premium Chrome OS laptop ships next week for $1,299 ",
+    "author":"jackie89",
+    "published_at":"1361473521.0",
+    "channel":"reddit",
+    "reach":1106,
+    "normalized_text":"google announces chromebook pixel a premium chrome os laptop ships next week for 1,299",
+    "processed_text":"google announce chromebook pixel premium chrome os laptop ship week 1,299",
+    "named_entities":"['google']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1i92zpp",
+    "brand":"Google",
+    "text":"I'm quitting Instagram. You should too | Mark Zuckerberg's horrible changes for Instagram \u2014 and Facebook \u2014 have become untenable, writes Lennon Torres. ",
+    "author":"chrisdh79",
+    "published_at":"1737745060.0",
+    "channel":"reddit",
+    "reach":44600,
+    "normalized_text":"i'm quitting instagram. you should too mark zuckerberg's horrible changes for instagram and facebook have become untenable, writes lennon torres.",
+    "processed_text":"quit instagram mark zuckerberg horrible change instagram facebook untenable write lennon torre",
+    "named_entities":"[\"mark zuckerberg's\"]",
+    "vader_label":"negative",
+    "vader_score":-0.5423,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1rksm5e",
+    "brand":"Google",
+    "text":"Your Pixel can now double up as a full Android PC with nothing more than a USB-C cable ",
+    "author":"gdelacalle",
+    "published_at":"1772647391.0",
+    "channel":"reddit",
+    "reach":167,
+    "normalized_text":"your pixel can now double up as a full android pc with nothing more than a usbc cable",
+    "processed_text":"pixel double android pc usbc cable",
+    "named_entities":"[]",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1jxaz1e",
+    "brand":"Google",
+    "text":"Google lays off hundreds of employees in Android, Pixel teams ",
+    "author":"MaffeoPolo",
+    "published_at":"1744439237.0",
+    "channel":"reddit",
+    "reach":743,
+    "normalized_text":"google lays off hundreds of employees in android, pixel teams",
+    "processed_text":"google lay hundred employee android pixel team",
+    "named_entities":"['google']",
+    "vader_label":"neutral",
+    "vader_score":0.0,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1gfohmw",
+    "brand":"Google",
+    "text":"Thousands of Pennsylvania voters received a text message this weekend that falsely claimed that they had already voted. Ignore them, officials say. ",
+    "author":"a_Ninja_b0y",
+    "published_at":"1730300187.0",
+    "channel":"reddit",
+    "reach":31371,
+    "normalized_text":"thousands of pennsylvania voters received a text message this weekend that falsely claimed that they had already voted. ignore them, officials say.",
+    "processed_text":"thousand pennsylvania voter receive text message weekend falsely claim vote ignore official",
+    "named_entities":"['pennsylvania']",
+    "vader_label":"negative",
+    "vader_score":-0.3612,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"unv4co",
+    "brand":"Google",
+    "text":"After roasting Apple about headphone jacks, Google quietly dumps it from Pixel 6A ",
+    "author":"Abhi_mech007",
+    "published_at":"1652338788.0",
+    "channel":"reddit",
+    "reach":791,
+    "normalized_text":"after roasting apple about headphone jacks, google quietly dumps it from pixel 6a",
+    "processed_text":"roast apple headphone jack google quietly dump pixel 6a",
+    "named_entities":"['google']",
+    "vader_label":"negative",
+    "vader_score":-0.3818,
+    "keybert_topics":[
+
+    ]
+  },
+  {
+    "id":"1d9cj3w",
+    "brand":"Google",
+    "text":"Photoshop\u2019s new terms of service require users to grant Adobe access to their active projects for \u201ccontent moderation\u201d and other purposes ",
+    "author":"Snoo26837",
+    "published_at":"1717658984.0",
+    "channel":"reddit",
+    "reach":20561,
+    "normalized_text":"photoshops new terms of service require users to grant adobe access to their active projects for content moderation and other purposes",
+    "processed_text":"photoshop new term service require user grant adobe access active project content moderation purpose",
+    "named_entities":"[]",
+    "vader_label":"positive",
+    "vader_score":0.6369,
+    "keybert_topics":[
+
+    ]
+  }
+]

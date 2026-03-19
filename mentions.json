@@ -1,0 +1,102 @@
+[
+    {
+        "id": "v1",
+        "brand": "Apple",
+        "channel": "youtube",
+        "sourceType": "video",
+        "author": "TechReviewerPro",
+        "text": "The M3 MacBook Pro display is the best I have ever seen on a laptop, period. Deep blacks and incredible brightness.",
+        "timestamp": 1710582000000,
+        "reach": 850000
+    },
+    {
+        "id": "c1",
+        "brand": "Apple",
+        "channel": "youtube",
+        "sourceType": "comment",
+        "author": "User123",
+        "text": "I hope they improve the thermal management under high load. My current M1 gets a bit warm.",
+        "timestamp": 1710578400000,
+        "reach": 1500
+    },
+    {
+        "id": "p1",
+        "brand": "Tesla",
+        "channel": "twitter",
+        "sourceType": "post",
+        "author": "EV_Enthusiast",
+        "text": "Tesla Model 3 Highland is a game changer. The ride quality is significantly improved over the previous gen.",
+        "timestamp": 1710574800000,
+        "reach": 120000
+    },
+    {
+        "id": "c2",
+        "brand": "Tesla",
+        "channel": "twitter",
+        "sourceType": "comment",
+        "author": " skeptic_guy",
+        "text": "Waiting to see how it performs in winter conditions. Range is always a concern for me.",
+        "timestamp": 1710571200000,
+        "reach": 200
+    },
+    {
+        "id": "p2",
+        "brand": "Nike",
+        "channel": "instagram",
+        "sourceType": "post",
+        "author": "RunFree",
+        "text": "New Vaporfly colors just dropped. Can't wait to hit the track tomorrow! #Nike #Running",
+        "timestamp": 1710567600000,
+        "reach": 45000
+    },
+    {
+        "id": "r1",
+        "brand": "Nike",
+        "channel": "reviews",
+        "sourceType": "review",
+        "author": "John D.",
+        "text": "Decent shoes but the sizing is inconsistent compared to the Pegasus 39. Had to return and size up.",
+        "timestamp": 1710564000000,
+        "reach": 450
+    },
+    {
+        "id": "v2",
+        "brand": "Starbucks",
+        "channel": "tiktok",
+        "sourceType": "video",
+        "author": "CoffeeLover",
+        "text": "Rating every Starbucks spring drink. The Lavender Latte is a 9/10!",
+        "timestamp": 1710560400000,
+        "reach": 1200000
+    },
+    {
+        "id": "c3",
+        "brand": "Starbucks",
+        "channel": "tiktok",
+        "sourceType": "comment",
+        "author": "BaristaLife",
+        "text": "Try it with oat milk next time, it's a total game changer!",
+        "timestamp": 1710556800000,
+        "reach": 5000
+    },
+    {
+        "id": "p3",
+        "brand": "Apple",
+        "channel": "reddit",
+        "sourceType": "post",
+        "author": "Mac_PowerUser",
+        "text": "Found a weird bug in macOS Sonoma with multi-monitor setup. Anyone else?",
+        "timestamp": 1710553200000,
+        "reach": 8500
+    },
+    {
+        "id": "c4",
+        "brand": "Nike",
+        "channel": "instagram",
+        "sourceType": "comment",
+        "author": "AthleticStyle",
+        "text": "Those look amazing, but are they available in the EU yet?",
+        "timestamp": 1710549600000,
+        "reach": 120
+    }
+]
