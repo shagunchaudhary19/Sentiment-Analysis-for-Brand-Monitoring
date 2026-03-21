@@ -1,97 +1,100 @@
-# Brand Sentiment Monitor – Frontend
+# 🚀 Brand Sentiment Monitor — AI-Powered SaaS Dashboard
 
-Modern single-page dashboard UI for **AI-based sentiment analysis and brand monitoring**.  
-This frontend is framework-free (plain HTML + JavaScript) and styled with Tailwind CSS via CDN.
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/shagunchaudhary19/Sentiment-Analysis-for-Brand-Monitoring/blob/main/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/shagunchaudhary19/Sentiment-Analysis-for-Brand-Monitoring/issues)
 
-> 🔧 The data is mocked in `app.js`. Replace the mock loader with your own AI sentiment API to go live.
+A premium, state-of-the-art **Brand Sentiment Analysis** platform designed for modern marketing teams. Monitor brand health in real-time across YouTube, Reddit, Instagram, and Facebook using advanced AI insights and human-centric design.
 
----
-
-## Features
-
-- **Brand selector**: Switch between multiple brands and see sentiment for each.
-- **Date range presets**: 24h / 7 days / 30 days.
-- **Channel filters**: Toggle Twitter/X, Instagram, News, and Reviews.
-- **KPI cards**:
-  - Total mentions
-  - Average sentiment score
-  - Positive / Neutral / Negative split
-  - Average reach per mention
-- **Trend chart**: Positive vs negative mentions over time.
-- **Recent mentions feed**: Highest‑impact posts and reviews with sentiment badges.
-- **Breakdowns**:
-  - Sentiment distribution
-  - Channel performance (per‑channel sentiment + share of mentions)
+![Landing Page Preview](assets/landing_light.png)
 
 ---
 
-## Getting started
+## ✨ Features
 
-### 1. Open locally (simplest)
+### 🧠 AI Brand Intelligence
+Go beyond simple numbers. Our **AI Intelligence Panel** summarizes exactly *what* people are saying and *how* to respond.
+- **Dynamic Summarization**: Automated insight bullets based on live sentiment volume.
+- **Strategic Recommendations**: AI-driven advice for engagement or amplification.
 
-1. Make sure you are in the project folder:
-   ```bash
-   cd d:\new_project
-   ```
-2. Open `index.html` in your browser (double‑click it in Explorer **or** drag it into a browser window).
+### 🌓 Premium Dual-Mode UI
+- **Pure White Mode**: A high-end, clean aesthetic for daylight professional work.
+- **Midnight Dark Mode**: A sleek, high-contrast dark theme for deep focus and monitoring.
+- **Glassmorphism & Micro-animations**: Smooth transitions, shimmering skeletons, and modern gradients.
 
-That’s it — the dashboard should load with mock sentiment data.
+### 📊 Advanced Analytics
+- **Multi-Brand Support**: Seamlessly switch between Apple, Samsung, Google, and more.
+- **Competitive Mode**: Side-by-side benchmarking (A vs. B) to track market share.
+- **Trend Charts**: Interactive `Chart.js` visualizations for positive vs. negative sentiment flow.
+- **High-Impact Mention Feed**: Real-time triage of the most influential posts.
 
-### 2. Serve as a static site (optional)
+---
 
-You can use any static HTTP server, for example:
+## 🛠️ Tech Stack
 
+- **Frontend**: Vanilla JS (ES6+), Tailwind CSS (3.x), Phosphor Icons, Chart.js.
+- **Backend**: Node.js (Express), SQLite3 (Persistence), axios.
+- **Data Pipeline**: Python 3.11, Pandas, VADER Sentiment, KeyBERT, spaCy.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- [Node.js](https://nodejs.org/) (v18+)
+- [Python](https://www.python.org/) (v3.10+)
+
+### 2. Installation & Setup
 ```bash
-cd d:\new_project
-npx serve .
+# Clone the repository
+git clone https://github.com/shagunchaudhary19/Sentiment-Analysis-for-Brand-Monitoring.git
+cd Sentiment-Analysis-for-Brand-Monitoring
+
+# Install dependencies
+npm install
+pip install -r requirements.txt
 ```
 
-Then open the printed URL (usually `http://localhost:3000`) in your browser.
+### 3. Initialize the Database
+```bash
+python init_db.py
+```
+
+### 4. Run the Platform
+```bash
+# Start the Backend & Server
+npm run start
+```
+Open **`http://localhost:4001`** to see the landing page. Navigation to `/dashboard` is handled automatically.
 
 ---
 
-## Plugging in your AI sentiment backend
+## 📸 Dashboard Preview
 
-All mock data lives in `app.js`.
-
-1. **Locate the mock loader** in `app.js`:
-   ```js
-   function loadMockData() {
-     // ...
-     return mentions;
-   }
-   ```
-2. **Replace it** with a call to your API, e.g.:
-   ```js
-   async function loadMockData() {
-     const res = await fetch("https://your-api/brand-sentiment?brand=...");
-     const json = await res.json();
-     return json.mentions; // map to the Mention shape below
-   }
-   ```
-3. Make sure each mention object matches this shape:
-   ```ts
-   type Mention = {
-     id: string;
-     brand: string;
-     channel: "twitter" | "instagram" | "news" | "reviews";
-     text: string;
-     sentimentScore: number; // -1..1
-     sentimentLabel: "positive" | "neutral" | "negative";
-     timestamp: number; // Unix ms
-     reach: number;
-   };
-   ```
-4. (Optional) Use CORS or a proxy if your API is on a different domain.
-
-Once wired, the existing UI (filters, KPIs, charts, feed) will automatically reflect your real‑time sentiment data.
+![Dashboard SaaS View](assets/dashboard_dark.png)
 
 ---
 
-## Customization ideas
+## 🗺️ Roadmap
+- [x] **Phase 1**: SQLite Migration for scalable data storage.
+- [x] **Phase 2**: AI Insights Panel integration.
+- [ ] **Phase 3**: Automated Email/Slack alerting system.
+- [ ] **Phase 4**: Expanded support for TikTok and LinkedIn via Official Graph APIs.
 
-- Add **authentication** and call a protected backend.
-- Swap mock chart for a library like **Chart.js** or **ECharts**.
-- Persist user filters (brand, range, channels) in **localStorage**.
-- Add **export to CSV/PDF** alongside the JSON snapshot button already in the header.
+---
 
+## 🤝 Contributing
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## ⚖️ License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+Created with ❤️ by [Shagun Chaudhary](https://github.com/shagunchaudhary19)
