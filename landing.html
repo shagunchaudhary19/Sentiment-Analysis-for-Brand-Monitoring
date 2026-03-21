@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Brand Sentiment Monitor | AI-Powered Social Insights</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A state-of-the-art AI sentiment analysis tool for real-time brand monitoring across global platforms." />
+  
+  <script>
+    (function () {
+      var stored = localStorage.getItem("theme");
+      var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var theme = stored === "light" || stored === "dark" ? stored : (prefersDark ? "dark" : "light");
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+      if (theme === "dark") document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
+    })();
+  </script>
+  
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: "#0d9488",
+              amber: "#f59e0b",
+              zinc: "#18181b",
+            }
+          }
+        }
+      }
+    };
+  </script>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" />
+    
+  <style>
+    :root {
+      --accent-warm: #f59e0b;
+      --accent-teal: #0d9488;
+      --glow-teal: rgba(13, 148, 136, 0.2);
+    }
+
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: "Fraunces", Georgia, serif;
+    }
+
+    .hero-gradient {
+      background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.05), transparent),
+                  radial-gradient(circle at bottom right, rgba(13, 148, 136, 0.05), transparent);
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dark .glass {
+      background: rgba(24, 24, 27, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glow-on-hover:hover {
+      box-shadow: 0 0 15px var(--glow-teal);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-entry {
+      animation: fadeIn 0.8s ease forwards;
+    }
+  </style>
+</head>
+
+<body class="bg-white text-stone-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200 selection:bg-teal-500/20">
+  
+  <!-- Navigation bar (Simplified for landing) -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass border-b border-stone-200/50 dark:border-zinc-800/50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-400 to-teal-500 flex items-center justify-center shadow-md">
+          <span class="text-zinc-950 font-bold text-sm">B</span>
+        </div>
+        <span class="text-lg font-semibold tracking-tight hidden sm:block">Brand Sentiment Monitor</span>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <button id="theme-toggle" class="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-zinc-800 transition-colors">
+          <i class="ph ph-sun dark:ph-moon text-xl"></i>
+        </button>
+        <a href="/dashboard" class="px-5 py-2 rounded-full bg-zinc-900 dark:bg-zinc-100 text-stone-100 dark:text-zinc-950 text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-black/10">
+          Enter App
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-24 lg:pt-32">
+    <!-- Hero Section -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 mb-20 lg:mb-32">
+      <div class="flex flex-col lg:flex-row gap-16 items-center">
+        <div class="flex-1 space-y-8 animate-entry">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 text-xs font-semibold">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+            </span>
+            Real-time Brand Monitoring
+          </div>
+          <h1 class="text-5xl lg:text-7xl leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-stone-900 via-stone-700 to-stone-900 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-100">
+            Know how people feel 
+            <span class="italic text-teal-600 dark:text-teal-400">before</span> it peaks.
+          </h1>
+          <p class="text-lg text-stone-600 dark:text-zinc-400 max-w-xl leading-relaxed">
+            Harness the power of AI to monitor brand health across social ecosystems. Detect shifts, analyze impact, and act on real-time sentiment data.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <a href="/dashboard" class="h-14 px-8 flex items-center justify-center rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition-all shadow-xl shadow-teal-600/20 hover:shadow-teal-600/30 group">
+              Get Started Now
+              <i class="ph ph-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+            <div class="h-14 px-4 flex items-center justify-center rounded-2xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-transparent text-sm font-medium">
+              <div class="flex -space-x-2 mr-3">
+                <img src="https://i.pravatar.cc/40?u=1" class="h-7 w-7 rounded-full border-2 border-white dark:border-zinc-900" alt="Avatar">
+                <img src="https://i.pravatar.cc/40?u=2" class="h-7 w-7 rounded-full border-2 border-white dark:border-zinc-900" alt="Avatar">
+                <img src="https://i.pravatar.cc/40?u=3" class="h-7 w-7 rounded-full border-2 border-white dark:border-zinc-900" alt="Avatar">
+              </div>
+              <span class="text-stone-500">Trusted by 200+ teams</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full lg:w-1/2 relative lg:rotate-[1deg] transition-all transform hover:rotate-0 duration-700">
+          <div class="absolute -inset-4 bg-gradient-to-tr from-amber-500/20 to-teal-500/20 blur-3xl opacity-50"></div>
+          <div class="glass rounded-2xl p-2 shadow-2xl relative">
+            <img id="hero-mockup" src="/assets/hero_mockup.png" alt="Dashboard Mockup" class="rounded-xl shadow-inner w-full object-cover">
+            <!-- Floating element mockups -->
+            <div class="absolute -bottom-6 -left-6 glass p-4 rounded-xl shadow-xl hidden md:block animate-bounce shadow-black/10 border-teal-500/20">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-600">
+                  <i class="ph ph-chart-line-up text-2xl"></i>
+                </div>
+                <div>
+                  <p class="text-[10px] uppercase text-stone-500">Sentiment Spike</p>
+                  <p class="text-sm font-bold">+24% Positivity</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 border-t border-stone-200/50 dark:border-zinc-800/50">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl leading-tight">Comprehensive AI Insights</h2>
+        <p class="mt-4 text-stone-500 dark:text-zinc-400 max-w-2xl mx-auto italic">
+          More than just keyword tracking. Deep context evaluation at scale.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="feature-card glass rounded-3xl p-6 transition-all">
+          <div class="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-6">
+            <i class="ph ph-brain text-3xl"></i>
+          </div>
+          <h3 class="text-xl mb-3">VADER Scoring</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+            Advanced NLP that understands nuance, sarcasm, and intensity in social mentions.
+          </p>
+        </div>
+        
+        <div class="feature-card glass rounded-3xl p-6 transition-all">
+          <div class="h-12 w-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500 mb-6">
+            <i class="ph ph-lightning text-3xl"></i>
+          </div>
+          <h3 class="text-xl mb-3">Instant Alerts</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+            Real-time synchronization with YouTube and Instagram Graph APIs.
+          </p>
+        </div>
+
+        <div class="feature-card glass rounded-3xl p-6 transition-all">
+          <div class="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-6">
+            <i class="ph ph-trend-up text-3xl"></i>
+          </div>
+          <h3 class="text-xl mb-3">Impact Tracking</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+            Measure the ripple effect. Track reach and engagement per mention.
+          </p>
+        </div>
+
+        <div class="feature-card glass rounded-3xl p-6 transition-all">
+          <div class="h-12 w-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-500 mb-6">
+            <i class="ph ph-export text-3xl"></i>
+          </div>
+          <h3 class="text-xl mb-3">Deep Exports</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+            Full JSON and CSV data exports for integration with your CRM or BI tools.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it Works Section -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 bg-stone-100/50 dark:bg-zinc-900/20 rounded-[3rem] mb-20">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl leading-tight">Master your narrative in 3 steps</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div class="text-center space-y-4">
+          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-teal-500 text-3xl font-bold">1</div>
+          <h3 class="text-xl">Connect Sources</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500">Pick the platforms that matter. Our bots start ingestion instantly.</p>
+        </div>
+        <div class="text-center space-y-4">
+          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-teal-500 text-3xl font-bold">2</div>
+          <h3 class="text-xl">AI Analysis</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500">Our VADER engines process every word for mood, tone, and intent.</p>
+        </div>
+        <div class="text-center space-y-4">
+          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-teal-500 text-3xl font-bold">3</div>
+          <h3 class="text-xl">Take Action</h3>
+          <p class="text-sm text-stone-500 dark:text-zinc-500">Use the dashboard to respond to crises or double down on success.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 py-20 mb-20">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl leading-tight">Scalable Plans</h2>
+        <p class="mt-4 text-stone-500 dark:text-zinc-400 italic">Early access pricing for small teams.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="glass p-8 rounded-[2rem] border-stone-200 dark:border-zinc-800 flex flex-col items-center text-center">
+          <span class="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-4">Solo</span>
+          <p class="text-4xl font-bold mb-6">$0 <span class="text-sm font-normal text-zinc-500">/mo</span></p>
+          <ul class="space-y-3 mb-10 text-sm text-stone-600 dark:text-zinc-400">
+            <li>1 Brand Monitoring</li>
+            <li>2 Social Platforms</li>
+            <li>24h Data Retention</li>
+          </ul>
+          <a href="/dashboard" class="w-full py-3 rounded-xl border border-stone-200 dark:border-zinc-800 font-bold hover:bg-stone-100 dark:hover:bg-zinc-900 transition-colors">Start for free</a>
+        </div>
+        
+        <div class="glass p-8 rounded-[2rem] border-teal-500/30 bg-teal-500/5 flex flex-col items-center text-center relative overflow-hidden">
+          <div class="absolute top-0 right-0 px-4 py-1 bg-teal-500 text-white text-[10px] uppercase font-bold tracking-widest rounded-bl-xl">Popular</div>
+          <span class="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-4">Brand Pro</span>
+          <p class="text-4xl font-bold mb-6">$49 <span class="text-sm font-normal text-zinc-500">/mo</span></p>
+          <ul class="space-y-3 mb-10 text-sm text-stone-600 dark:text-zinc-400">
+            <li>Unlimited Brands</li>
+            <li>All Social Platforms</li>
+            <li>Real-time Live Sync</li>
+            <li>30-day History</li>
+          </ul>
+          <a href="/dashboard" class="w-full py-3 rounded-xl bg-teal-600 text-white font-bold hover:bg-teal-700 transition-colors shadow-lg shadow-teal-600/20">Upgrade Now</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Source Configurator Section -->
+
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 mb-20">
+      <div class="rounded-[2.5rem] bg-gradient-to-br from-stone-900 to-zinc-950 dark:from-zinc-900 dark:to-zinc-950 p-8 lg:p-16 flex flex-col lg:flex-row gap-16 items-center shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-amber-400/10 blur-[100px] pointer-events-none"></div>
+        
+        <div class="flex-1 space-y-6 relative z-10 text-white">
+          <h2 class="text-4xl leading-tight">Ready to listen?</h2>
+          <p class="text-zinc-400 text-lg leading-relaxed italic">
+            Configure your focus channels here. These settings will follow you into the dashboard for a seamless start.
+          </p>
+          <ul class="space-y-4">
+            <li class="flex items-center gap-3 text-sm text-zinc-300">
+              <i class="ph ph-check-circle text-teal-400"></i>
+              No credit card required to start
+            </li>
+            <li class="flex items-center gap-3 text-sm text-zinc-300">
+              <i class="ph ph-check-circle text-teal-400"></i>
+              Connect up to 4 major platforms
+            </li>
+          </ul>
+        </div>
+
+        <div class="w-full lg:w-[450px] space-y-4 relative z-10">
+          <div class="bg-zinc-800/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 lg:p-8">
+            <p class="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-6 font-bold">Launch Configuration</p>
+            
+            <div class="grid grid-cols-2 gap-3" id="source-selector">
+              <label class="group cursor-pointer">
+                <input type="checkbox" id="src-instagram" class="hidden peer">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                  <i class="ph ph-instagram-logo text-2xl text-pink-500 mb-2"></i>
+                  <span class="text-[11px] font-medium text-zinc-300">Instagram</span>
+                </div>
+              </label>
+              
+              <label class="group cursor-pointer">
+                <input type="checkbox" id="src-facebook" class="hidden peer">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                  <i class="ph ph-facebook-logo text-2xl text-indigo-500 mb-2"></i>
+                  <span class="text-[11px] font-medium text-zinc-300">Facebook</span>
+                </div>
+              </label>
+
+              <label class="group cursor-pointer">
+                <input type="checkbox" id="src-reddit" class="hidden peer">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                  <i class="ph ph-reddit-logo text-2xl text-orange-500 mb-2"></i>
+                  <span class="text-[11px] font-medium text-zinc-300">Reddit</span>
+                </div>
+              </label>
+
+              <label class="group cursor-pointer">
+                <input type="checkbox" id="src-youtube" class="hidden peer">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                  <i class="ph ph-youtube-logo text-2xl text-red-500 mb-2"></i>
+                  <span class="text-[11px] font-medium text-zinc-300">YouTube</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/5">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] uppercase text-zinc-500 font-bold">Active Scope</span>
+                <span id="source-preview" class="text-xs text-teal-400 font-medium italic">Select sources...</span>
+              </div>
+              <a id="open-dashboard-btn" href="/dashboard" class="block w-full text-center py-4 rounded-2xl bg-white text-zinc-950 font-bold hover:bg-teal-400 transition-colors shadow-2xl">
+                Launch Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-white dark:bg-zinc-950 border-t border-stone-200 dark:border-zinc-900 py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex flex-col md:flex-row justify-between items-start gap-12">
+        <div class="max-w-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-400 to-teal-500 flex items-center justify-center">
+              <span class="text-zinc-950 font-bold text-sm">B</span>
+            </div>
+            <span class="font-bold">Sentiment Monitor</span>
+          </div>
+          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+            Built for brand managers who need to stay ahead of the narrative. Scalable, AI-driven, and intuitive.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-12">
+          <div class="space-y-4">
+            <h4 class="font-bold text-sm uppercase tracking-wider">Product</h4>
+            <ul class="space-y-2 text-sm text-stone-500 dark:text-zinc-500">
+              <li><a href="#" class="hover:text-teal-500">API Documentation</a></li>
+              <li><a href="#" class="hover:text-teal-500">Integrations</a></li>
+              <li><a href="#" class="hover:text-teal-500">Change Log</a></li>
+            </ul>
+          </div>
+          <div class="space-y-4">
+            <h4 class="font-bold text-sm uppercase tracking-wider">Resources</h4>
+            <ul class="space-y-2 text-sm text-stone-500 dark:text-zinc-500">
+              <li><a href="#" class="hover:text-teal-500">Sentiment Best Practices</a></li>
+              <li><a href="#" class="hover:text-teal-500">Crisis Management</a></li>
+              <li><a href="#" class="hover:text-teal-500">Case Studies</a></li>
+            </ul>
+          </div>
+          <div class="space-y-4">
+            <h4 class="font-bold text-sm uppercase tracking-wider">Company</h4>
+            <ul class="space-y-2 text-sm text-stone-500 dark:text-zinc-500">
+              <li><a href="#" class="hover:text-teal-500">Contact Support</a></li>
+              <li><a href="#" class="hover:text-teal-500">Privacy Policy</a></li>
+              <li><a href="#" class="hover:text-teal-500">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-16 pt-8 border-t border-stone-200 dark:border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-[12px] text-stone-500 dark:text-zinc-600">
+          Built with precision. (v1.2.4-stable)
+        </p>
+        <p class="text-[12px] text-stone-500 dark:text-zinc-600">
+          &copy; 2026 Brand Sentiment Analysis. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "brandSentiment.sources.v1";
+    const defaults = ["reddit", "youtube"];
+
+    const src = {
+      instagram: document.getElementById("src-instagram"),
+      facebook: document.getElementById("src-facebook"),
+      reddit: document.getElementById("src-reddit"),
+      youtube: document.getElementById("src-youtube"),
+    };
+
+    const themeToggle = document.getElementById("theme-toggle");
+
+    function getSelected() {
+      return Object.entries(src)
+        .filter(([k, el]) => !!el && el.checked)
+        .map(([k]) => k);
+    }
+
+    function setSelected(selected) {
+      const s = new Set(selected || []);
+      Object.entries(src).forEach(([k, el]) => {
+        if (!el) return;
+        el.checked = s.has(k);
+      });
+    }
+
+    function renderPreview() {
+      const selected = getSelected();
+      const pretty = selected.length
+        ? selected
+          .map((k) => k[0].toUpperCase() + k.slice(1))
+          .join(", ")
+        : "No sources selected.";
+      const el = document.getElementById("source-preview");
+      if (el) el.textContent = pretty;
+    }
+
+    function hydrate() {
+      // Theme
+      const root = document.documentElement;
+      themeToggle.addEventListener("click", () => {
+        const current = root.classList.contains("dark") ? "dark" : "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.classList.toggle("dark");
+        root.dataset.theme = next;
+        localStorage.setItem("theme", next);
+      });
+
+      // Sources
+      let stored = null;
+      try {
+        stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      } catch { }
+      const initial = Array.isArray(stored) && stored.length ? stored : defaults;
+      setSelected(initial);
+      renderPreview();
+    }
+
+    Object.values(src).forEach((el) => {
+      if (!el) return;
+      el.addEventListener("change", () => {
+        const selected = getSelected();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(selected));
+        renderPreview();
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", hydrate);
+  </script>
+</body>
+
+</html>

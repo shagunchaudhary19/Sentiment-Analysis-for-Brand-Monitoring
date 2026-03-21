@@ -33,13 +33,16 @@ def fetch_reddit_comments(subreddit_name: str, keyword: str, brand: str = "Unkno
         
     # Mock fallback if real fetch fails
     if not comments:
+        from datetime import datetime
+        import time
+        now_ts = time.time()
         print(f"Reddit fetch returned no data for {brand}. Using mock Reddit data!")
         comments = [
-            {"id": "r1", "brand": brand, "text": f"Just saw the new {keyword} update. It looks incredible!", "author": "Redditor1", "published_at": "Today", "channel": "reddit", "reach": 420},
-            {"id": "r2", "brand": brand, "text": f"Who else thinks {keyword} is completely overrated? Downvote me if you want.", "author": "Redditor2", "published_at": "Today", "channel": "reddit", "reach": 6},
-            {"id": "r3", "brand": brand, "text": f"My thoughts on {keyword} after a week of use: It's solid but has some bugs.", "author": "Redditor3", "published_at": "Today", "channel": "reddit", "reach": 150},
-            {"id": "r4", "brand": brand, "text": f"Terrible customer service from {keyword}. Never buying again.", "author": "Redditor4", "published_at": "Today", "channel": "reddit", "reach": 55},
-            {"id": "r5", "brand": brand, "text": f"Can we take a moment to appreciate {keyword}?", "author": "Redditor5", "published_at": "Today", "channel": "reddit", "reach": 1200}
+            {"id": "r1", "brand": brand, "text": f"Just saw the new {keyword} update. It looks incredible!", "author": "Redditor1", "published_at": str(now_ts - 3600), "channel": "reddit", "reach": 420},
+            {"id": "r2", "brand": brand, "text": f"Who else thinks {keyword} is completely overrated? Downvote me if you want.", "author": "Redditor2", "published_at": str(now_ts - 86400), "channel": "reddit", "reach": 6},
+            {"id": "r3", "brand": brand, "text": f"My thoughts on {keyword} after a week of use: It's solid but has some bugs.", "author": "Redditor3", "published_at": str(now_ts - 200000), "channel": "reddit", "reach": 150},
+            {"id": "r4", "brand": brand, "text": f"Terrible customer service from {keyword}. Never buying again.", "author": "Redditor4", "published_at": str(now_ts - 500), "channel": "reddit", "reach": 55},
+            {"id": "r5", "brand": brand, "text": f"Can we take a moment to appreciate {keyword}?", "author": "Redditor5", "published_at": str(now_ts - 10000), "channel": "reddit", "reach": 1200}
         ]
         
     return comments

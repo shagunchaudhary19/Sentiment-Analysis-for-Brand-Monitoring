@@ -77,6 +77,27 @@
       border-radius: 999px;
     }
 
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    .dark .skeleton {
+      background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+      background-size: 200% 100%;
+    }
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(161, 161, 170, 0.6);
     }
@@ -94,16 +115,16 @@
   </style>
 </head>
 
-<body class="bg-stone-50 text-stone-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200">
+<body class="bg-white text-stone-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200">
   <div
-    class="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100 dark:from-zinc-950 dark:via-zinc-950 dark:to-stone-900/50">
+    class="min-h-screen flex flex-col lg:flex-row bg-white dark:from-zinc-950 dark:via-zinc-950 dark:to-stone-900/50 dark:bg-gradient-to-br">
     <!-- Mobile Sidebar Overlay -->
     <div id="sidebar-overlay"
       class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity opacity-0"></div>
 
     <!-- Sidebar -->
     <aside id="sidebar"
-      class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full lg:relative lg:translate-x-0 lg:w-80 border-r border-stone-200/80 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/80 backdrop-blur-xl transition-transform duration-300 ease-out">
+      class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full lg:relative lg:translate-x-0 lg:w-80 border-r border-stone-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/80 backdrop-blur-xl transition-transform duration-300 ease-out">
       <div class="px-6 pt-6 pb-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <button id="close-sidebar"
@@ -172,40 +193,42 @@
         <!-- Sources info -->
         <div class="space-y-3 pt-4 border-t border-stone-100 dark:border-zinc-800/50">
           <div class="flex items-center justify-between">
-            <p class="text-[10px] font-medium uppercase tracking-wider text-stone-500 dark:text-zinc-500">Platform
-              Filters</p>
+            <p class="text-[10px] font-medium uppercase tracking-wider text-stone-500 dark:text-zinc-500">Sources</p>
             <button id="clear-filters-btn"
               class="text-[9px] font-medium text-teal-600 dark:text-teal-400 hover:underline">Clear all</button>
           </div>
-          <div class="flex items-center gap-2.5 flex-wrap" id="platform-filter-btns">
-            <button data-platform="youtube"
-              class="p-2 rounded-lg bg-stone-100 dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 hover:border-rose-500/50 transition-all filter-active"
-              title="YouTube">
-              <i class="ph ph-youtube-logo text-lg text-rose-500"></i>
-            </button>
-            <button data-platform="tiktok"
-              class="p-2 rounded-lg bg-stone-100 dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 hover:border-zinc-500/50 transition-all filter-active"
-              title="TikTok">
-              <i class="ph ph-tiktok-logo text-lg text-zinc-900 dark:text-zinc-100"></i>
-            </button>
-            <button data-platform="twitter"
-              class="p-2 rounded-lg bg-stone-100 dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 hover:border-sky-500/50 transition-all filter-active"
-              title="X/Twitter">
-              <i class="ph ph-twitter-logo text-lg text-sky-500"></i>
-            </button>
-            <button data-platform="instagram"
-              class="p-2 rounded-lg bg-stone-100 dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 hover:border-pink-500/50 transition-all filter-active"
-              title="Instagram">
-              <i class="ph ph-instagram-logo text-lg text-pink-500"></i>
-            </button>
-            <button data-platform="reddit"
-              class="p-2 rounded-lg bg-stone-100 dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 hover:border-orange-500/50 transition-all filter-active"
-              title="Reddit">
-              <i class="ph ph-reddit-logo text-lg text-orange-500"></i>
-            </button>
+          <div class="grid grid-cols-2 gap-2.5" id="platform-filter-btns">
+            <label
+              class="flex items-center gap-2 rounded-lg border border-stone-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/30 px-3 py-2 cursor-pointer hover:border-teal-500/40 transition-colors">
+              <input type="checkbox" data-platform="youtube" checked class="h-4 w-4 accent-teal-600" />
+              <span class="inline-flex items-center gap-2 text-[11px] text-stone-700 dark:text-zinc-300">
+                <i class="ph ph-youtube-logo text-rose-500"></i> YouTube
+              </span>
+            </label>
+            <label
+              class="flex items-center gap-2 rounded-lg border border-stone-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/30 px-3 py-2 cursor-pointer hover:border-teal-500/40 transition-colors">
+              <input type="checkbox" data-platform="reddit" checked class="h-4 w-4 accent-teal-600" />
+              <span class="inline-flex items-center gap-2 text-[11px] text-stone-700 dark:text-zinc-300">
+                <i class="ph ph-reddit-logo text-orange-500"></i> Reddit
+              </span>
+            </label>
+            <label
+              class="flex items-center gap-2 rounded-lg border border-stone-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/30 px-3 py-2 cursor-pointer hover:border-teal-500/40 transition-colors">
+              <input type="checkbox" data-platform="instagram" class="h-4 w-4 accent-teal-600" />
+              <span class="inline-flex items-center gap-2 text-[11px] text-stone-700 dark:text-zinc-300">
+                <i class="ph ph-instagram-logo text-pink-500"></i> Instagram
+              </span>
+            </label>
+            <label
+              class="flex items-center gap-2 rounded-lg border border-stone-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/30 px-3 py-2 cursor-pointer hover:border-teal-500/40 transition-colors">
+              <input type="checkbox" data-platform="facebook" class="h-4 w-4 accent-teal-600" />
+              <span class="inline-flex items-center gap-2 text-[11px] text-stone-700 dark:text-zinc-300">
+                <i class="ph ph-facebook-logo text-indigo-500"></i> Facebook
+              </span>
+            </label>
           </div>
           <p class="text-[9px] text-stone-400 dark:text-zinc-500 leading-relaxed italic">
-            Select platforms to filter content. Live analysis gathers data from all active sites simultaneously.
+            Pick which sources to analyze. (Live refresh works when credentials are configured; otherwise cached data is shown.)
           </p>
         </div>
       </div>
@@ -215,7 +238,7 @@
     <main class="flex-1 flex flex-col">
       <!-- Top bar -->
       <header
-        class="border-b border-stone-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl">
+        class="border-b border-stone-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/70 backdrop-blur-xl">
         <div
           class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-3 md:hidden">
@@ -266,7 +289,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <!-- Sentiment trend -->
             <div data-card
-              class="lg:col-span-2 rounded-2xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/70 p-4 sm:p-5 shadow-sm dark:shadow-zinc-950/50">
+              class="lg:col-span-2 rounded-2xl border border-stone-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/70 p-4 sm:p-5 shadow-lg shadow-stone-200/40 dark:shadow-none">
               <div class="flex items-center justify-between mb-4">
                 <div>
                   <h3 class="text-sm font-semibold text-stone-900 dark:text-zinc-100">Sentiment trend</h3>
@@ -302,7 +325,7 @@
 
             <!-- Latest mentions -->
             <div data-card
-              class="rounded-2xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/70 p-4 sm:p-5 flex flex-col max-h-[420px]">
+              class="rounded-2xl border border-stone-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/70 p-4 sm:p-5 flex flex-col max-h-[420px] shadow-lg shadow-stone-200/40 dark:shadow-none">
               <div class="flex items-center justify-between mb-3">
                 <div>
                   <h3 class="text-sm font-semibold text-stone-900 dark:text-zinc-100">Recent mentions</h3>
@@ -354,6 +377,20 @@
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- AI Insights Panel -->
+          <div id="ai-insights-panel" class="mb-6 hidden">
+            <div
+              class="rounded-2xl border border-teal-500/20 bg-teal-50/50 dark:bg-teal-500/5 p-4 shadow-sm border-l-4 border-l-teal-500">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="ph ph-sparkle text-teal-600 dark:text-teal-400 text-lg"></i>
+                <h3 class="text-sm font-semibold text-stone-900 dark:text-zinc-100 italic">AI Brand Intelligence</h3>
+              </div>
+              <ul id="ai-insights-list" class="space-y-2 text-xs text-stone-700 dark:text-zinc-300 list-disc ml-4">
+                <!-- Populated by JS -->
+              </ul>
             </div>
           </div>
 

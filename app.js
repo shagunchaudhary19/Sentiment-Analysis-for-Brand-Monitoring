@@ -213,7 +213,8 @@ const state = {
   rawMentions: [],
   selectedBrand: null,
   dateRange: "24h",
-  channels: ["youtube", "twitter", "tiktok", "instagram", "reddit", "news", "reviews"],
+  // Supported sources for the UI
+  channels: ["reddit", "youtube"],
   searchQuery: "",
   highImpactOnly: false,
   sort: "latest",
@@ -229,6 +230,27 @@ const state = {
 const themeState = {
   current: "dark",
 };
+
+const SUPPORTED_PLATFORMS = ["instagram", "facebook", "reddit", "youtube"];
+const LANDING_SOURCES_KEY = "brandSentiment.sources.v1";
+
+function sanitizePlatforms(platforms) {
+  const set = new Set(Array.isArray(platforms) ? platforms.map(String) : []);
+  const filtered = SUPPORTED_PLATFORMS.filter((p) => set.has(p));
+  return filtered.length ? filtered : ["reddit", "youtube"];
+}
+
+function loadLandingPlatforms() {
+  try {
+    const raw = localStorage.getItem(LANDING_SOURCES_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    return sanitizePlatforms(parsed);
+  } catch {
+    return null;
+  }
+}
 
 async function init() {
   initTheme();
@@ -652,7 +674,12 @@ function restoreFiltersFromStorage() {
       if (typeof parsed.highImpactOnly === "boolean") state.highImpactOnly = parsed.highImpactOnly;
       if (typeof parsed.sort === "string") state.sort = parsed.sort;
       if (typeof parsed.selectedBrand === "string") state.selectedBrand = parsed.selectedBrand;
-      if (Array.isArray(parsed.channels)) state.channels = parsed.channels;
+      if (Array.isArray(parsed.channels)) state.channels = sanitizePlatforms(parsed.channels);
+    }
+    // If no stored channels, prefer the landing page selection.
+    if (!state.channels || !state.channels.length) {
+      const landing = loadLandingPlatforms();
+      if (landing) state.channels = landing;
     }
     hydrateUiControls();
   } catch {
@@ -1005,13 +1032,25 @@ function renderKpiCards(stats) {
   const { total, positive, neutral, negative, avgScore, reachPerMention } =
     stats;
 
-  const sentimentScoreColor = sentimentColor(avgScore);
-  const sentimentScoreText =
-    sentimentScoreColor === "teal"
-      ? "text-teal-600 dark:text-teal-400"
-      : sentimentScoreColor === "rose"
-        ? "text-rose-600 dark:text-rose-400"
-        : "text-stone-600 dark:text-zinc-400";
+  const sentimentScoreText = avgScore > 0 ? "text-teal-600 dark:text-teal-400" : avgScore < 0 ? "text-rose-600 dark:text-rose-400" : "text-stone-600 dark:text-zinc-400";
+
+  // AI Insights Logic
+  const insightsPanel = document.getElementById("ai-insights-panel");
+  const insightsList = document.getElementById("ai-insights-list");
+  if (insightsPanel && insightsList) {
+    if (total > 0) {
+      insightsPanel.classList.remove("hidden");
+      const sentimentTrend = avgScore > 0.3 ? "dominantly positive" : avgScore < -0.3 ? "critically negative" : "largely neutral";
+      const topPlatform = stats.byPlatform && stats.byPlatform.size > 0 ? Array.from(stats.byPlatform.keys())[0] : "All Platforms";
+      insightsList.innerHTML = `
+        <li>Overall sentiment for <b>${state.selectedBrand}</b> is <b>${sentimentTrend}</b>.</li>
+        <li>The primary driver of discussion is concentrated on <b>${topPlatform}</b>.</li>
+        ${total > 5 ? `<li>AI recommends <b>${avgScore < 0 ? 'Urgent Engagement' : 'Amplification'}</b> based on current volume of ${total} mentions.</li>` : ''}
+      `;
+    } else {
+      insightsPanel.classList.add("hidden");
+    }
+  }
 
   els.kpiCards.innerHTML = `
     <div data-card class="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/80 px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-zinc-950/50">
@@ -1020,9 +1059,16 @@ function renderKpiCards(stats) {
       <p class="text-[11px] text-stone-500 dark:text-zinc-500">Across all sources & range</p>
     </div>
     <div data-card class="rounded-xl border border-teal-500/30 dark:border-teal-500/25 bg-teal-50/80 dark:bg-teal-500/5 px-4 py-3.5 flex flex-col gap-1.5">
-      <p class="text-[10px] font-medium text-teal-700 dark:text-teal-400 uppercase tracking-[0.18em]">Sentiment score</p>
+    <div data-card class="rounded-xl border border-teal-500/30 dark:border-teal-500/20 bg-teal-50/80 dark:bg-teal-500/5 px-4 py-3.5 flex flex-col gap-1.5">
+      <div class="flex items-center justify-between">
+        <p class="text-[10px] font-medium text-teal-700 dark:text-teal-400 uppercase tracking-[0.18em]">Sentiment score</p>
+        ${state.isCompareMode ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">VS ${state.compareBrand}</span>` : ''}
+      </div>
       <p class="text-2xl font-semibold ${sentimentScoreText}">${avgScore.toFixed(2)}</p>
-      <p class="text-[11px] text-teal-600/90 dark:text-teal-400/80">Higher is more positive</p>
+      <p class="text-[11px] text-teal-600/90 dark:text-teal-400/80">
+        ${state.isCompareMode ? `Benchmark: <span class="font-bold">0.12</span> avg` : 'Higher is more positive'}
+      </p>
+    </div>
     </div>
     <div data-card class="rounded-xl border border-amber-500/25 dark:border-amber-500/20 bg-amber-50/80 dark:bg-amber-500/5 px-4 py-3.5 flex flex-col gap-1.5">
       <p class="text-[10px] font-medium text-amber-700 dark:text-amber-400 uppercase tracking-[0.18em]">Sentiment split</p>

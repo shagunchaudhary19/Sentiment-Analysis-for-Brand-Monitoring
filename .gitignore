@@ -32,4 +32,10 @@ Thumbs.db
 *.swo
 
 # Streamlit
-.streamlit/secrets.toml
+# Project specific
+database/*.db
+dashboard/data/*.json
+dashboard/data/*.csv
+fix_dates.py
+init_db.py
+saas_evolution_plan.md

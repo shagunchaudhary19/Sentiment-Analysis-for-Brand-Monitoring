@@ -49,12 +49,14 @@ show_yt = sc1.checkbox("YouTube", value=True)
 show_tw = sc2.checkbox("Twitter", value=True)
 show_rd = sc3.checkbox("Reddit", value=False)
 show_ig = sc4.checkbox("Instagram", value=True)
+show_fb = st.sidebar.checkbox("Facebook", value=True)
 
 selected_channels = []
 if show_yt: selected_channels.append("youtube")
 if show_tw: selected_channels.append("twitter")
 if show_rd: selected_channels.append("reddit")
 if show_ig: selected_channels.append("instagram")
+if show_fb: selected_channels.append("facebook")
 
 st.sidebar.markdown('**Date Range**')
 date_range = st.sidebar.radio("Range", ["24h", "7d", "30d"], horizontal=True, label_visibility="collapsed")
@@ -212,6 +214,7 @@ def get_platform_icon(channel):
     if 'youtube' in c: return "🔴 YouTube"
     if 'twitter' in c: return "🐦 Twitter"
     if 'instagram' in c: return "📸 Instagram"
+    if 'facebook' in c: return "📘 Facebook"
     if 'reddit' in c: return "🤖 Reddit"
     return f"🌐 {c.capitalize()}"
 
