@@ -26,7 +26,8 @@ def fetch_reddit_comments(subreddit_name: str, keyword: str, brand: str = "Unkno
                         "author": post_data.get('author', 'Unknown'),
                         "published_at": str(post_data.get('created_utc', '')),
                         "channel": "reddit",
-                        "reach": post_data.get('ups', 0) # proxy for impact/upvotes
+                        "reach": post_data.get('ups', 0), # proxy for impact/upvotes
+                        "url": "https://reddit.com" + post_data.get('permalink', '') if post_data.get('permalink') else ''
                     })
     except Exception as e:
         print(f"Could not connect to Reddit (HTTP Rate Limit/Error): {e}")
@@ -35,14 +36,15 @@ def fetch_reddit_comments(subreddit_name: str, keyword: str, brand: str = "Unkno
     if not comments:
         from datetime import datetime
         import time
+        import random
         now_ts = time.time()
         print(f"Reddit fetch returned no data for {brand}. Using mock Reddit data!")
         comments = [
-            {"id": "r1", "brand": brand, "text": f"Just saw the new {keyword} update. It looks incredible!", "author": "Redditor1", "published_at": str(now_ts - 3600), "channel": "reddit", "reach": 420},
-            {"id": "r2", "brand": brand, "text": f"Who else thinks {keyword} is completely overrated? Downvote me if you want.", "author": "Redditor2", "published_at": str(now_ts - 86400), "channel": "reddit", "reach": 6},
-            {"id": "r3", "brand": brand, "text": f"My thoughts on {keyword} after a week of use: It's solid but has some bugs.", "author": "Redditor3", "published_at": str(now_ts - 200000), "channel": "reddit", "reach": 150},
-            {"id": "r4", "brand": brand, "text": f"Terrible customer service from {keyword}. Never buying again.", "author": "Redditor4", "published_at": str(now_ts - 500), "channel": "reddit", "reach": 55},
-            {"id": "r5", "brand": brand, "text": f"Can we take a moment to appreciate {keyword}?", "author": "Redditor5", "published_at": str(now_ts - 10000), "channel": "reddit", "reach": 1200}
+            {"id": f"r{random.randint(100,999)}", "brand": brand, "text": f"Just saw the new {keyword} update. It looks incredible!", "author": "Redditor1", "published_at": str(now_ts - 3600), "channel": "reddit", "reach": 420, "url": f"https://reddit.com/r/technology/comments/mock1"},
+            {"id": f"r{random.randint(100,999)}", "brand": brand, "text": f"Who else thinks {keyword} is completely overrated? Downvote me if you want.", "author": "Redditor2", "published_at": str(now_ts - 86400), "channel": "reddit", "reach": 6, "url": f"https://reddit.com/r/technology/comments/mock2"},
+            {"id": f"r{random.randint(100,999)}", "brand": brand, "text": f"My thoughts on {keyword} after a week of use: It's solid but has some bugs.", "author": "Redditor3", "published_at": str(now_ts - 200000), "channel": "reddit", "reach": 150, "url": f"https://reddit.com/r/technology/comments/mock3"},
+            {"id": f"r{random.randint(100,999)}", "brand": brand, "text": f"Terrible customer service from {keyword}. Never buying again.", "author": "Redditor4", "published_at": str(now_ts - 500), "channel": "reddit", "reach": 55, "url": f"https://reddit.com/r/technology/comments/mock4"},
+            {"id": f"r{random.randint(100,999)}", "brand": brand, "text": f"Can we take a moment to appreciate {keyword}?", "author": "Redditor5", "published_at": str(now_ts - 10000), "channel": "reddit", "reach": 1200, "url": f"https://reddit.com/r/technology/comments/mock5"}
         ]
         
     return comments

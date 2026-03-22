@@ -27,8 +27,8 @@
         extend: {
           colors: {
             brand: {
-              teal: "#0d9488",
-              amber: "#f59e0b",
+              indigo: "#0d9488",
+              purple: "#f59e0b",
               zinc: "#18181b",
             }
           }
@@ -46,8 +46,8 @@
   <style>
     :root {
       --accent-warm: #f59e0b;
-      --accent-teal: #0d9488;
-      --glow-teal: rgba(13, 148, 136, 0.2);
+      --accent-indigo: #0d9488;
+      --glow-indigo: rgba(13, 148, 136, 0.2);
     }
 
     body {
@@ -83,7 +83,7 @@
     }
     
     .glow-on-hover:hover {
-      box-shadow: 0 0 15px var(--glow-teal);
+      box-shadow: 0 0 15px var(--glow-indigo);
     }
 
     @keyframes fadeIn {
@@ -97,23 +97,24 @@
   </style>
 </head>
 
-<body class="bg-white text-stone-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200 selection:bg-teal-500/20">
+<body class="bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200 selection:bg-indigo-500/20">
   
   <!-- Navigation bar (Simplified for landing) -->
-  <nav class="fixed top-0 inset-x-0 z-50 glass border-b border-stone-200/50 dark:border-zinc-800/50">
+  <nav class="fixed top-0 inset-x-0 z-50 glass border-b border-zinc-200/50 dark:border-zinc-800/50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-400 to-teal-500 flex items-center justify-center shadow-md">
+        <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center shadow-md">
           <span class="text-zinc-950 font-bold text-sm">B</span>
         </div>
         <span class="text-lg font-semibold tracking-tight hidden sm:block">Brand Sentiment Monitor</span>
       </div>
       
       <div class="flex items-center gap-4">
-        <button id="theme-toggle" class="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-zinc-800 transition-colors">
-          <i class="ph ph-sun dark:ph-moon text-xl"></i>
+        <button id="theme-toggle" class="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+          <i class="ph ph-sun block dark:hidden text-xl"></i>
+          <i class="ph ph-moon hidden dark:block text-xl"></i>
         </button>
-        <a href="/dashboard" class="px-5 py-2 rounded-full bg-zinc-900 dark:bg-zinc-100 text-stone-100 dark:text-zinc-950 text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-black/10">
+        <a href="/dashboard" class="px-5 py-2 rounded-full bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-950 text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-black/10">
           Enter App
         </a>
       </div>
@@ -125,49 +126,49 @@
     <section class="max-w-6xl mx-auto px-4 sm:px-6 mb-20 lg:mb-32">
       <div class="flex flex-col lg:flex-row gap-16 items-center">
         <div class="flex-1 space-y-8 animate-entry">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 text-xs font-semibold">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
             <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
             </span>
             Real-time Brand Monitoring
           </div>
-          <h1 class="text-5xl lg:text-7xl leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-stone-900 via-stone-700 to-stone-900 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-100">
+          <h1 class="text-5xl lg:text-7xl leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-100">
             Know how people feel 
-            <span class="italic text-teal-600 dark:text-teal-400">before</span> it peaks.
+            <span class="italic text-indigo-600 dark:text-indigo-400">before</span> it peaks.
           </h1>
-          <p class="text-lg text-stone-600 dark:text-zinc-400 max-w-xl leading-relaxed">
+          <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed">
             Harness the power of AI to monitor brand health across social ecosystems. Detect shifts, analyze impact, and act on real-time sentiment data.
           </p>
           
           <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <a href="/dashboard" class="h-14 px-8 flex items-center justify-center rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition-all shadow-xl shadow-teal-600/20 hover:shadow-teal-600/30 group">
+            <a href="/dashboard" class="h-14 px-8 flex items-center justify-center rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/30 group">
               Get Started Now
               <i class="ph ph-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
             </a>
-            <div class="h-14 px-4 flex items-center justify-center rounded-2xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-transparent text-sm font-medium">
+            <div class="h-14 px-4 flex items-center justify-center rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-transparent text-sm font-medium">
               <div class="flex -space-x-2 mr-3">
                 <img src="https://i.pravatar.cc/40?u=1" class="h-7 w-7 rounded-full border-2 border-white dark:border-zinc-900" alt="Avatar">
                 <img src="https://i.pravatar.cc/40?u=2" class="h-7 w-7 rounded-full border-2 border-white dark:border-zinc-900" alt="Avatar">
                 <img src="https://i.pravatar.cc/40?u=3" class="h-7 w-7 rounded-full border-2 border-white dark:border-zinc-900" alt="Avatar">
               </div>
-              <span class="text-stone-500">Trusted by 200+ teams</span>
+              <span class="text-zinc-500">Trusted by 200+ teams</span>
             </div>
           </div>
         </div>
 
         <div class="w-full lg:w-1/2 relative lg:rotate-[1deg] transition-all transform hover:rotate-0 duration-700">
-          <div class="absolute -inset-4 bg-gradient-to-tr from-amber-500/20 to-teal-500/20 blur-3xl opacity-50"></div>
+          <div class="absolute -inset-4 bg-gradient-to-tr from-purple-500/20 to-indigo-500/20 blur-3xl opacity-50"></div>
           <div class="glass rounded-2xl p-2 shadow-2xl relative">
             <img id="hero-mockup" src="/assets/hero_mockup.png" alt="Dashboard Mockup" class="rounded-xl shadow-inner w-full object-cover">
             <!-- Floating element mockups -->
-            <div class="absolute -bottom-6 -left-6 glass p-4 rounded-xl shadow-xl hidden md:block animate-bounce shadow-black/10 border-teal-500/20">
+            <div class="absolute -bottom-6 -left-6 glass p-4 rounded-xl shadow-xl hidden md:block animate-bounce shadow-black/10 border-indigo-500/20">
               <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-600">
+                <div class="h-10 w-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-600">
                   <i class="ph ph-chart-line-up text-2xl"></i>
                 </div>
                 <div>
-                  <p class="text-[10px] uppercase text-stone-500">Sentiment Spike</p>
+                  <p class="text-[10px] uppercase text-zinc-500">Sentiment Spike</p>
                   <p class="text-sm font-bold">+24% Positivity</p>
                 </div>
               </div>
@@ -178,31 +179,31 @@
     </section>
 
     <!-- Features Section -->
-    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 border-t border-stone-200/50 dark:border-zinc-800/50">
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 border-t border-zinc-200/50 dark:border-zinc-800/50">
       <div class="text-center mb-16">
         <h2 class="text-3xl sm:text-4xl leading-tight">Comprehensive AI Insights</h2>
-        <p class="mt-4 text-stone-500 dark:text-zinc-400 max-w-2xl mx-auto italic">
+        <p class="mt-4 text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto italic">
           More than just keyword tracking. Deep context evaluation at scale.
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="feature-card glass rounded-3xl p-6 transition-all">
-          <div class="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-6">
+          <div class="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 mb-6">
             <i class="ph ph-brain text-3xl"></i>
           </div>
           <h3 class="text-xl mb-3">VADER Scoring</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+          <p class="text-sm text-zinc-500 dark:text-zinc-500 leading-relaxed">
             Advanced NLP that understands nuance, sarcasm, and intensity in social mentions.
           </p>
         </div>
         
         <div class="feature-card glass rounded-3xl p-6 transition-all">
-          <div class="h-12 w-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500 mb-6">
+          <div class="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-6">
             <i class="ph ph-lightning text-3xl"></i>
           </div>
           <h3 class="text-xl mb-3">Instant Alerts</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+          <p class="text-sm text-zinc-500 dark:text-zinc-500 leading-relaxed">
             Real-time synchronization with YouTube and Instagram Graph APIs.
           </p>
         </div>
@@ -212,7 +213,7 @@
             <i class="ph ph-trend-up text-3xl"></i>
           </div>
           <h3 class="text-xl mb-3">Impact Tracking</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+          <p class="text-sm text-zinc-500 dark:text-zinc-500 leading-relaxed">
             Measure the ripple effect. Track reach and engagement per mention.
           </p>
         </div>
@@ -222,7 +223,7 @@
             <i class="ph ph-export text-3xl"></i>
           </div>
           <h3 class="text-xl mb-3">Deep Exports</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+          <p class="text-sm text-zinc-500 dark:text-zinc-500 leading-relaxed">
             Full JSON and CSV data exports for integration with your CRM or BI tools.
           </p>
         </div>
@@ -230,26 +231,26 @@
     </section>
 
     <!-- How it Works Section -->
-    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 bg-stone-100/50 dark:bg-zinc-900/20 rounded-[3rem] mb-20">
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 bg-zinc-100/50 dark:bg-zinc-900/20 rounded-[3rem] mb-20">
       <div class="text-center mb-16">
         <h2 class="text-3xl sm:text-4xl leading-tight">Master your narrative in 3 steps</h2>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
         <div class="text-center space-y-4">
-          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-teal-500 text-3xl font-bold">1</div>
+          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-indigo-500 text-3xl font-bold">1</div>
           <h3 class="text-xl">Connect Sources</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500">Pick the platforms that matter. Our bots start ingestion instantly.</p>
+          <p class="text-sm text-zinc-500 dark:text-zinc-500">Pick the platforms that matter. Our bots start ingestion instantly.</p>
         </div>
         <div class="text-center space-y-4">
-          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-teal-500 text-3xl font-bold">2</div>
+          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-indigo-500 text-3xl font-bold">2</div>
           <h3 class="text-xl">AI Analysis</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500">Our VADER engines process every word for mood, tone, and intent.</p>
+          <p class="text-sm text-zinc-500 dark:text-zinc-500">Our VADER engines process every word for mood, tone, and intent.</p>
         </div>
         <div class="text-center space-y-4">
-          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-teal-500 text-3xl font-bold">3</div>
+          <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mx-auto text-indigo-500 text-3xl font-bold">3</div>
           <h3 class="text-xl">Take Action</h3>
-          <p class="text-sm text-stone-500 dark:text-zinc-500">Use the dashboard to respond to crises or double down on success.</p>
+          <p class="text-sm text-zinc-500 dark:text-zinc-500">Use the dashboard to respond to crises or double down on success.</p>
         </div>
       </div>
     </section>
@@ -258,32 +259,32 @@
     <section class="max-w-4xl mx-auto px-4 sm:px-6 py-20 mb-20">
       <div class="text-center mb-16">
         <h2 class="text-3xl sm:text-4xl leading-tight">Scalable Plans</h2>
-        <p class="mt-4 text-stone-500 dark:text-zinc-400 italic">Early access pricing for small teams.</p>
+        <p class="mt-4 text-zinc-500 dark:text-zinc-400 italic">Early access pricing for small teams.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="glass p-8 rounded-[2rem] border-stone-200 dark:border-zinc-800 flex flex-col items-center text-center">
+        <div class="glass p-8 rounded-[2rem] border-zinc-200 dark:border-zinc-800 flex flex-col items-center text-center">
           <span class="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-4">Solo</span>
           <p class="text-4xl font-bold mb-6">$0 <span class="text-sm font-normal text-zinc-500">/mo</span></p>
-          <ul class="space-y-3 mb-10 text-sm text-stone-600 dark:text-zinc-400">
+          <ul class="space-y-3 mb-10 text-sm text-zinc-600 dark:text-zinc-400">
             <li>1 Brand Monitoring</li>
             <li>2 Social Platforms</li>
             <li>24h Data Retention</li>
           </ul>
-          <a href="/dashboard" class="w-full py-3 rounded-xl border border-stone-200 dark:border-zinc-800 font-bold hover:bg-stone-100 dark:hover:bg-zinc-900 transition-colors">Start for free</a>
+          <a href="/dashboard" class="w-full py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 font-bold hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">Start for free</a>
         </div>
         
-        <div class="glass p-8 rounded-[2rem] border-teal-500/30 bg-teal-500/5 flex flex-col items-center text-center relative overflow-hidden">
-          <div class="absolute top-0 right-0 px-4 py-1 bg-teal-500 text-white text-[10px] uppercase font-bold tracking-widest rounded-bl-xl">Popular</div>
+        <div class="glass p-8 rounded-[2rem] border-indigo-500/30 bg-indigo-500/5 flex flex-col items-center text-center relative overflow-hidden">
+          <div class="absolute top-0 right-0 px-4 py-1 bg-indigo-500 text-white text-[10px] uppercase font-bold tracking-widest rounded-bl-xl">Popular</div>
           <span class="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-4">Brand Pro</span>
           <p class="text-4xl font-bold mb-6">$49 <span class="text-sm font-normal text-zinc-500">/mo</span></p>
-          <ul class="space-y-3 mb-10 text-sm text-stone-600 dark:text-zinc-400">
+          <ul class="space-y-3 mb-10 text-sm text-zinc-600 dark:text-zinc-400">
             <li>Unlimited Brands</li>
             <li>All Social Platforms</li>
             <li>Real-time Live Sync</li>
             <li>30-day History</li>
           </ul>
-          <a href="/dashboard" class="w-full py-3 rounded-xl bg-teal-600 text-white font-bold hover:bg-teal-700 transition-colors shadow-lg shadow-teal-600/20">Upgrade Now</a>
+          <a href="/dashboard" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20">Upgrade Now</a>
         </div>
       </div>
     </section>
@@ -291,9 +292,9 @@
     <!-- Source Configurator Section -->
 
     <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20 mb-20">
-      <div class="rounded-[2.5rem] bg-gradient-to-br from-stone-900 to-zinc-950 dark:from-zinc-900 dark:to-zinc-950 p-8 lg:p-16 flex flex-col lg:flex-row gap-16 items-center shadow-2xl relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 blur-[100px] pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-amber-400/10 blur-[100px] pointer-events-none"></div>
+      <div class="rounded-[2.5rem] bg-gradient-to-br from-zinc-900 to-zinc-950 dark:from-zinc-900 dark:to-zinc-950 p-8 lg:p-16 flex flex-col lg:flex-row gap-16 items-center shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-purple-400/10 blur-[100px] pointer-events-none"></div>
         
         <div class="flex-1 space-y-6 relative z-10 text-white">
           <h2 class="text-4xl leading-tight">Ready to listen?</h2>
@@ -302,11 +303,11 @@
           </p>
           <ul class="space-y-4">
             <li class="flex items-center gap-3 text-sm text-zinc-300">
-              <i class="ph ph-check-circle text-teal-400"></i>
+              <i class="ph ph-check-circle text-indigo-400"></i>
               No credit card required to start
             </li>
             <li class="flex items-center gap-3 text-sm text-zinc-300">
-              <i class="ph ph-check-circle text-teal-400"></i>
+              <i class="ph ph-check-circle text-indigo-400"></i>
               Connect up to 4 major platforms
             </li>
           </ul>
@@ -319,7 +320,7 @@
             <div class="grid grid-cols-2 gap-3" id="source-selector">
               <label class="group cursor-pointer">
                 <input type="checkbox" id="src-instagram" class="hidden peer">
-                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-indigo-500/20 peer-checked:border-indigo-500/50 transition-all hover:bg-white/10 group-active:scale-95">
                   <i class="ph ph-instagram-logo text-2xl text-pink-500 mb-2"></i>
                   <span class="text-[11px] font-medium text-zinc-300">Instagram</span>
                 </div>
@@ -327,7 +328,7 @@
               
               <label class="group cursor-pointer">
                 <input type="checkbox" id="src-facebook" class="hidden peer">
-                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-indigo-500/20 peer-checked:border-indigo-500/50 transition-all hover:bg-white/10 group-active:scale-95">
                   <i class="ph ph-facebook-logo text-2xl text-indigo-500 mb-2"></i>
                   <span class="text-[11px] font-medium text-zinc-300">Facebook</span>
                 </div>
@@ -335,7 +336,7 @@
 
               <label class="group cursor-pointer">
                 <input type="checkbox" id="src-reddit" class="hidden peer">
-                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-indigo-500/20 peer-checked:border-indigo-500/50 transition-all hover:bg-white/10 group-active:scale-95">
                   <i class="ph ph-reddit-logo text-2xl text-orange-500 mb-2"></i>
                   <span class="text-[11px] font-medium text-zinc-300">Reddit</span>
                 </div>
@@ -343,7 +344,7 @@
 
               <label class="group cursor-pointer">
                 <input type="checkbox" id="src-youtube" class="hidden peer">
-                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-teal-500/20 peer-checked:border-teal-500/50 transition-all hover:bg-white/10 group-active:scale-95">
+                <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 peer-checked:bg-indigo-500/20 peer-checked:border-indigo-500/50 transition-all hover:bg-white/10 group-active:scale-95">
                   <i class="ph ph-youtube-logo text-2xl text-red-500 mb-2"></i>
                   <span class="text-[11px] font-medium text-zinc-300">YouTube</span>
                 </div>
@@ -353,9 +354,9 @@
             <div class="mt-8 pt-6 border-t border-white/5">
               <div class="flex items-center justify-between mb-4">
                 <span class="text-[10px] uppercase text-zinc-500 font-bold">Active Scope</span>
-                <span id="source-preview" class="text-xs text-teal-400 font-medium italic">Select sources...</span>
+                <span id="source-preview" class="text-xs text-indigo-400 font-medium italic">Select sources...</span>
               </div>
-              <a id="open-dashboard-btn" href="/dashboard" class="block w-full text-center py-4 rounded-2xl bg-white text-zinc-950 font-bold hover:bg-teal-400 transition-colors shadow-2xl">
+              <a id="open-dashboard-btn" href="/dashboard" class="block w-full text-center py-4 rounded-2xl bg-white text-zinc-950 font-bold hover:bg-indigo-400 transition-colors shadow-2xl">
                 Launch Dashboard
               </a>
             </div>
@@ -365,17 +366,17 @@
     </section>
   </main>
 
-  <footer class="bg-white dark:bg-zinc-950 border-t border-stone-200 dark:border-zinc-900 py-16">
+  <footer class="bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-900 py-16">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="flex flex-col md:flex-row justify-between items-start gap-12">
         <div class="max-w-xs space-y-4">
           <div class="flex items-center gap-3">
-            <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-400 to-teal-500 flex items-center justify-center">
+            <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
               <span class="text-zinc-950 font-bold text-sm">B</span>
             </div>
             <span class="font-bold">Sentiment Monitor</span>
           </div>
-          <p class="text-sm text-stone-500 dark:text-zinc-500 leading-relaxed">
+          <p class="text-sm text-zinc-500 dark:text-zinc-500 leading-relaxed">
             Built for brand managers who need to stay ahead of the narrative. Scalable, AI-driven, and intuitive.
           </p>
         </div>
@@ -383,36 +384,36 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-12">
           <div class="space-y-4">
             <h4 class="font-bold text-sm uppercase tracking-wider">Product</h4>
-            <ul class="space-y-2 text-sm text-stone-500 dark:text-zinc-500">
-              <li><a href="#" class="hover:text-teal-500">API Documentation</a></li>
-              <li><a href="#" class="hover:text-teal-500">Integrations</a></li>
-              <li><a href="#" class="hover:text-teal-500">Change Log</a></li>
+            <ul class="space-y-2 text-sm text-zinc-500 dark:text-zinc-500">
+              <li><a href="#" class="hover:text-indigo-500">API Documentation</a></li>
+              <li><a href="#" class="hover:text-indigo-500">Integrations</a></li>
+              <li><a href="#" class="hover:text-indigo-500">Change Log</a></li>
             </ul>
           </div>
           <div class="space-y-4">
             <h4 class="font-bold text-sm uppercase tracking-wider">Resources</h4>
-            <ul class="space-y-2 text-sm text-stone-500 dark:text-zinc-500">
-              <li><a href="#" class="hover:text-teal-500">Sentiment Best Practices</a></li>
-              <li><a href="#" class="hover:text-teal-500">Crisis Management</a></li>
-              <li><a href="#" class="hover:text-teal-500">Case Studies</a></li>
+            <ul class="space-y-2 text-sm text-zinc-500 dark:text-zinc-500">
+              <li><a href="#" class="hover:text-indigo-500">Sentiment Best Practices</a></li>
+              <li><a href="#" class="hover:text-indigo-500">Crisis Management</a></li>
+              <li><a href="#" class="hover:text-indigo-500">Case Studies</a></li>
             </ul>
           </div>
           <div class="space-y-4">
             <h4 class="font-bold text-sm uppercase tracking-wider">Company</h4>
-            <ul class="space-y-2 text-sm text-stone-500 dark:text-zinc-500">
-              <li><a href="#" class="hover:text-teal-500">Contact Support</a></li>
-              <li><a href="#" class="hover:text-teal-500">Privacy Policy</a></li>
-              <li><a href="#" class="hover:text-teal-500">Terms of Service</a></li>
+            <ul class="space-y-2 text-sm text-zinc-500 dark:text-zinc-500">
+              <li><a href="#" class="hover:text-indigo-500">Contact Support</a></li>
+              <li><a href="#" class="hover:text-indigo-500">Privacy Policy</a></li>
+              <li><a href="#" class="hover:text-indigo-500">Terms of Service</a></li>
             </ul>
           </div>
         </div>
       </div>
       
-      <div class="mt-16 pt-8 border-t border-stone-200 dark:border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-[12px] text-stone-500 dark:text-zinc-600">
+      <div class="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-[12px] text-zinc-500 dark:text-zinc-600">
           Built with precision. (v1.2.4-stable)
         </p>
-        <p class="text-[12px] text-stone-500 dark:text-zinc-600">
+        <p class="text-[12px] text-zinc-500 dark:text-zinc-600">
           &copy; 2026 Brand Sentiment Analysis. All rights reserved.
         </p>
       </div>
@@ -465,6 +466,7 @@
         const next = current === "dark" ? "light" : "dark";
         root.classList.toggle("dark");
         root.dataset.theme = next;
+        root.style.colorScheme = next;
         localStorage.setItem("theme", next);
       });
 

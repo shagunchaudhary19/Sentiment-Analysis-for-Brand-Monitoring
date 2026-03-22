@@ -54,7 +54,8 @@ def fetch_facebook_posts(keyword: str, brand: str = "Unknown", limit: int = 25):
                 "author": brand,
                 "published_at": item.get("created_time", ""),
                 "channel": "facebook",
-                "reach": likes + comments * 5
+                "reach": likes + comments * 5,
+                "url": item.get("permalink_url", f"https://facebook.com/{item.get('id', '')}")
             })
 
     except urllib.error.HTTPError as e:
@@ -79,53 +80,58 @@ def _mock_facebook_data(keyword: str, brand: str, limit: int = 5):
     
     base = [
         {
-            "id": "fb1",
+            "id": f"fb_{random.randint(100,999)}",
             "brand": brand,
             "text": f"The new {keyword} launch has everyone talking! Drop your thoughts below 👇 Have you tried it yet?",
             "author": f"{brand} Official",
             "published_at": (now - timedelta(hours=random.randint(1, 5))).isoformat() + "Z",
             "channel": "facebook",
-            "reach": 5800
+            "reach": 5800,
+            "url": "https://facebook.com/mock1"
         },
         {
-            "id": "fb2",
+            "id": f"fb_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Sharing my honest 30-day review of {keyword}. The good: great battery life, solid build. "
                     f"The bad: the software still needs work. Overall 7/10.",
             "author": "TechTalk Community",
             "published_at": (now - timedelta(days=random.randint(1, 4))).isoformat() + "Z",
             "channel": "facebook",
-            "reach": 1450
+            "reach": 1450,
+            "url": "https://facebook.com/mock2"
         },
         {
-            "id": "fb3",
+            "id": f"fb_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Just switched from a competitor to {keyword} and I am BLOWN AWAY by the difference. "
                     f"Never going back. Highly recommend!",
             "author": "Sarah M.",
             "published_at": (now - timedelta(hours=random.randint(8, 24))).isoformat() + "Z",
             "channel": "facebook",
-            "reach": 320
+            "reach": 320,
+            "url": "https://facebook.com/mock3"
         },
         {
-            "id": "fb4",
+            "id": f"fb_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Customer support for {keyword} is terrible. Been waiting 2 weeks for a response. "
                     f"Very disappointed. Will not be buying again.",
             "author": "James K.",
             "published_at": (now - timedelta(days=random.randint(5, 12))).isoformat() + "Z",
             "channel": "facebook",
-            "reach": 78
+            "reach": 78,
+            "url": "https://facebook.com/mock4"
         },
         {
-            "id": "fb5",
+            "id": f"fb_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Anyone else excited about the upcoming {keyword} announcement? "
                     f"The leaks look promising! 🔥 Tag a friend who needs to know about this.",
             "author": "Tech Enthusiasts Group",
             "published_at": (now - timedelta(minutes=random.randint(15, 300))).isoformat() + "Z",
             "channel": "facebook",
-            "reach": 2300
+            "reach": 2300,
+            "url": "https://facebook.com/mock5"
         },
     ]
     return base[:limit]

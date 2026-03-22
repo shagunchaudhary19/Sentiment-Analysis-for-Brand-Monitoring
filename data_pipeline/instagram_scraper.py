@@ -92,49 +92,54 @@ def _mock_instagram_data(keyword: str, brand: str, limit: int = 5):
     
     base = [
         {
-            "id": "ig1",
+            "id": f"ig_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Obsessed with my new {keyword} purchase! The quality is next level 😍 #unboxing #{keyword.replace(' ','')}",
             "author": "lifestyle_by_mia",
             "published_at": (now - timedelta(hours=random.randint(2, 8))).isoformat() + "Z",
             "channel": "instagram",
-            "reach": 3420
+            "reach": 3420,
+            "url": "https://instagram.com/p/mock1"
         },
         {
-            "id": "ig2",
+            "id": f"ig_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Honestly, {keyword} disappointed me this time. The build quality feels cheap for the price. #techreview",
             "author": "gadget_reviewer_99",
             "published_at": (now - timedelta(days=random.randint(1, 2))).isoformat() + "Z",
             "channel": "instagram",
-            "reach": 890
+            "reach": 890,
+            "url": "https://instagram.com/p/mock2"
         },
         {
-            "id": "ig3",
+            "id": f"ig_{random.randint(100,999)}",
             "brand": brand,
             "text": f"My {keyword} aesthetic setup is finally complete ✨ Drop a 🔥 if you love it! #setup #deskgoals",
             "author": "minimal_desk_vibes",
             "published_at": (now - timedelta(days=random.randint(4, 10))).isoformat() + "Z",
             "channel": "instagram",
-            "reach": 12500
+            "reach": 12500,
+            "url": "https://instagram.com/p/mock3"
         },
         {
-            "id": "ig4",
+            "id": f"ig_{random.randint(100,999)}",
             "brand": brand,
             "text": f"Not sponsored, just genuinely love {keyword}. Been using it daily for 3 months and zero complaints! #honest",
             "author": "tech_honest_reviews",
             "published_at": (now - timedelta(hours=random.randint(12, 48))).isoformat() + "Z",
             "channel": "instagram",
-            "reach": 2100
+            "reach": 2100,
+            "url": "https://instagram.com/p/mock4"
         },
         {
-            "id": "ig5",
+            "id": f"ig_{random.randint(100,999)}",
             "brand": brand,
             "text": f"The new {keyword} update is a vibe. Super smooth experience! Who else noticed the performance boost? 🚀",
             "author": "daily_tech_drop",
             "published_at": (now - timedelta(minutes=random.randint(30, 600))).isoformat() + "Z",
             "channel": "instagram",
-            "reach": 567
+            "reach": 567,
+            "url": "https://instagram.com/p/mock5"
         },
     ]
     return base[:limit]

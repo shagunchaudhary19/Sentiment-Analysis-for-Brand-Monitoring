@@ -160,7 +160,7 @@ function sentimentLabelFromScore(score) {
 }
 
 function sentimentColor(score) {
-  if (score > 0.2) return "teal";
+  if (score > 0.2) return "indigo";
   if (score < -0.2) return "rose";
   return "zinc";
 }
@@ -173,6 +173,8 @@ function roundedPercent(part, total) {
 // DOM hooks
 const els = {
   brandSelect: document.getElementById("brand-select"),
+  compareToggle: document.getElementById("compare-toggle"),
+  compareSelect: document.getElementById("compare-select"),
   dateRangeToggle: document.getElementById("date-range-toggle"),
   brandPulse: document.getElementById("brand-sentiment-pulse"),
   kpiCards: document.getElementById("kpi-cards"),
@@ -205,6 +207,7 @@ const els = {
   mentionDrawerText: document.getElementById("mention-drawer-text"),
   mentionDrawerSentiment: document.getElementById("mention-drawer-sentiment"),
   mentionDrawerReach: document.getElementById("mention-drawer-reach"),
+  mentionDrawerUrl: document.getElementById("mention-drawer-url"),
   platformFilterBtns: document.getElementById("platform-filter-btns"),
   clearFiltersBtn: document.getElementById("clear-filters-btn"),
 };
@@ -212,6 +215,8 @@ const els = {
 const state = {
   rawMentions: [],
   selectedBrand: null,
+  isCompareMode: false,
+  compareBrand: null,
   dateRange: "24h",
   // Supported sources for the UI
   channels: ["reddit", "youtube"],
@@ -331,7 +336,7 @@ async function executeLiveAnalysis() {
   }
 
   btn.disabled = false;
-  btn.innerHTML = `<i class="ph ph-lightning text-amber-500"></i> Live Analyze`;
+  btn.innerHTML = `<i class="ph ph-lightning text-purple-500"></i> Live Analyze`;
 
   render();
 }
@@ -441,6 +446,13 @@ function initTheme() {
       localStorage.setItem("theme", next);
       applyTheme(next);
       updateThemeToggleUi(next);
+      
+      // Force chart to re-render with new theme colors
+      if (state.chartInstance) {
+        state.chartInstance.destroy();
+        state.chartInstance = null;
+        render();
+      }
     });
   }
 }
@@ -448,11 +460,22 @@ function initTheme() {
 function hydrateBrandSelector(brands) {
   if (!els.brandSelect) return;
   els.brandSelect.innerHTML = "";
+  if (els.compareSelect) els.compareSelect.innerHTML = `<option value="">Select competitor...</option>`;
+  
   brands.forEach((brand) => {
+    // Populate main select
     const opt = document.createElement("option");
     opt.value = brand;
     opt.textContent = brand;
     els.brandSelect.appendChild(opt);
+    
+    // Populate compare select
+    if (els.compareSelect) {
+      const cOpt = document.createElement("option");
+      cOpt.value = brand;
+      cOpt.textContent = brand;
+      els.compareSelect.appendChild(cOpt);
+    }
   });
 
   // Restore previously selected brand if present in list
@@ -462,6 +485,14 @@ function hydrateBrandSelector(brands) {
     );
     if (exists) els.brandSelect.value = state.selectedBrand;
   }
+  if (state.compareBrand && els.compareSelect) {
+    const exists = Array.from(els.compareSelect.options).some((o) => o.value === state.compareBrand);
+    if (exists) els.compareSelect.value = state.compareBrand;
+  }
+  if (els.compareToggle) {
+    els.compareToggle.checked = state.isCompareMode;
+    if (els.compareSelect) els.compareSelect.disabled = !state.isCompareMode;
+  }
 
   els.brandSelect.addEventListener("change", () => {
     state.selectedBrand = els.brandSelect.value || null;
@@ -469,6 +500,21 @@ function hydrateBrandSelector(brands) {
     persistFiltersToStorage();
     render();
   });
+  
+  if (els.compareToggle && els.compareSelect) {
+    els.compareToggle.addEventListener("change", (e) => {
+      state.isCompareMode = !!e.target.checked;
+      els.compareSelect.disabled = !state.isCompareMode;
+      persistFiltersToStorage();
+      render();
+    });
+    
+    els.compareSelect.addEventListener("change", () => {
+      state.compareBrand = els.compareSelect.value || null;
+      persistFiltersToStorage();
+      render();
+    });
+  }
 }
 
 function hydrateDateRangeToggle() {
@@ -487,22 +533,22 @@ function hydrateDateRangeToggle() {
           b.classList.add(
             "bg-white",
             "dark:bg-zinc-800",
-            "text-stone-900",
+            "text-zinc-900",
             "dark:text-zinc-100",
             "shadow-sm",
             "dark:shadow-zinc-950/50"
           );
-          b.classList.remove("text-stone-600", "dark:text-zinc-400");
+          b.classList.remove("text-zinc-600", "dark:text-zinc-400");
         } else {
           b.classList.remove(
             "bg-white",
             "dark:bg-zinc-800",
-            "text-stone-900",
+            "text-zinc-900",
             "dark:text-zinc-100",
             "shadow-sm",
             "dark:shadow-zinc-950/50"
           );
-          b.classList.add("text-stone-600", "dark:text-zinc-400");
+          b.classList.add("text-zinc-600", "dark:text-zinc-400");
         }
       });
 
@@ -586,24 +632,24 @@ function updateChartTypeToggleUi() {
       b.classList.add(
         "bg-white",
         "dark:bg-zinc-800",
-        "text-stone-900",
+        "text-zinc-900",
         "dark:text-zinc-100",
         "shadow-sm",
         "dark:shadow-zinc-950/50",
         "font-medium"
       );
-      b.classList.remove("text-stone-600", "dark:text-zinc-400");
+      b.classList.remove("text-zinc-600", "dark:text-zinc-400");
     } else {
       b.classList.remove(
         "bg-white",
         "dark:bg-zinc-800",
-        "text-stone-900",
+        "text-zinc-900",
         "dark:text-zinc-100",
         "shadow-sm",
         "dark:shadow-zinc-950/50",
         "font-medium"
       );
-      b.classList.add("text-stone-600", "dark:text-zinc-400");
+      b.classList.add("text-zinc-600", "dark:text-zinc-400");
     }
   });
 }
@@ -644,6 +690,14 @@ function openMentionDrawer(mention) {
     els.mentionDrawerSentiment.textContent = `${sentimentLabelFromScore(mention.sentimentScore)} • ${mention.sentimentScore.toFixed(2)}`;
   }
   if (els.mentionDrawerReach) els.mentionDrawerReach.textContent = (mention.reach ?? 0).toLocaleString();
+  if (els.mentionDrawerUrl) {
+    if (mention.url) {
+      els.mentionDrawerUrl.href = mention.url;
+      els.mentionDrawerUrl.classList.remove("hidden");
+    } else {
+      els.mentionDrawerUrl.classList.add("hidden");
+    }
+  }
 }
 
 const STORAGE_KEY = "brandSentiment.filters.v1";
@@ -651,6 +705,8 @@ function persistFiltersToStorage() {
   try {
     const payload = {
       selectedBrand: state.selectedBrand,
+      isCompareMode: state.isCompareMode,
+      compareBrand: state.compareBrand,
       dateRange: state.dateRange,
       searchQuery: state.searchQuery,
       highImpactOnly: state.highImpactOnly,
@@ -674,6 +730,8 @@ function restoreFiltersFromStorage() {
       if (typeof parsed.highImpactOnly === "boolean") state.highImpactOnly = parsed.highImpactOnly;
       if (typeof parsed.sort === "string") state.sort = parsed.sort;
       if (typeof parsed.selectedBrand === "string") state.selectedBrand = parsed.selectedBrand;
+      if (typeof parsed.isCompareMode === "boolean") state.isCompareMode = parsed.isCompareMode;
+      if (typeof parsed.compareBrand === "string") state.compareBrand = parsed.compareBrand;
       if (Array.isArray(parsed.channels)) state.channels = sanitizePlatforms(parsed.channels);
     }
     // If no stored channels, prefer the landing page selection.
@@ -780,8 +838,8 @@ function showToast(message, type = "info") {
   const toast = document.createElement("div");
   const colors =
     type === "success"
-      ? "bg-teal-500/10 border-teal-500/30 text-teal-700 dark:text-teal-300"
-      : "bg-stone-800 dark:bg-zinc-900 border-stone-700 dark:border-zinc-700 text-stone-200 dark:text-zinc-200";
+      ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-700 dark:text-indigo-300"
+      : "bg-zinc-800 dark:bg-zinc-900 border-zinc-700 dark:border-zinc-700 text-zinc-200 dark:text-zinc-200";
 
   toast.className = `
     flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl transform translate-y-10 opacity-0 transition-all duration-300 ${colors}
@@ -866,30 +924,30 @@ function renderPlatformFilters() {
     const platform = btn.getAttribute("data-platform");
     if (state.channels.includes(platform)) {
       btn.classList.add(
-        "bg-teal-50",
-        "dark:bg-teal-900/40",
-        "border-teal-300",
-        "dark:border-teal-700"
+        "bg-indigo-50",
+        "dark:bg-indigo-900/40",
+        "border-indigo-300",
+        "dark:border-indigo-700"
       );
       btn.classList.remove(
         "opacity-50",
-        "bg-stone-100",
+        "bg-zinc-100",
         "dark:bg-zinc-900",
-        "border-stone-200",
+        "border-zinc-200",
         "dark:border-zinc-800"
       );
     } else {
       btn.classList.remove(
-        "bg-teal-50",
-        "dark:bg-teal-900/40",
-        "border-teal-300",
-        "dark:border-teal-700"
+        "bg-indigo-50",
+        "dark:bg-indigo-900/40",
+        "border-indigo-300",
+        "dark:border-indigo-700"
       );
       btn.classList.add(
         "opacity-50",
-        "bg-stone-100",
+        "bg-zinc-100",
         "dark:bg-zinc-900",
-        "border-stone-200",
+        "border-zinc-200",
         "dark:border-zinc-800"
       );
     }
@@ -897,16 +955,15 @@ function renderPlatformFilters() {
 }
 
 function renderLoadingState() {
-  // KPI skeletons
   if (els.kpiCards) {
     els.kpiCards.innerHTML = `
       ${Array.from({ length: 4 })
         .map(
           () => `
-        <div data-card class="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/80 px-4 py-3.5 shadow-sm dark:shadow-zinc-950/50">
-          <div class="h-3 w-24 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-          <div class="mt-3 h-7 w-16 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-          <div class="mt-2 h-3 w-40 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+        <div data-card class="relative overflow-hidden rounded-xl border border-zinc-200/50 dark:border-white/5 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
+          <div class="h-3 w-24 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+          <div class="mt-3 h-7 w-16 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+          <div class="mt-2 h-3 w-40 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
         </div>
       `
         )
@@ -920,13 +977,13 @@ function renderLoadingState() {
       ${Array.from({ length: 6 })
         .map(
           () => `
-        <div class="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 px-3.5 py-3.5 shadow-sm dark:shadow-zinc-950/50">
+        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 px-3.5 py-3.5 shadow-sm dark:shadow-zinc-950/50">
           <div class="flex items-center justify-between">
-            <div class="h-3 w-28 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-            <div class="h-3 w-16 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+            <div class="h-3 w-28 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+            <div class="h-3 w-16 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>
-          <div class="mt-3 h-3 w-full bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-          <div class="mt-2 h-3 w-4/5 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+          <div class="mt-3 h-3 w-full bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+          <div class="mt-2 h-3 w-4/5 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
         </div>
       `
         )
@@ -938,11 +995,11 @@ function renderLoadingState() {
   if (els.mentionsPaginationLabel) els.mentionsPaginationLabel.textContent = "Loading…";
   if (els.sentimentDistribution) {
     els.sentimentDistribution.innerHTML =
-      '<div class="h-4 w-40 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>';
+      '<div class="h-4 w-40 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>';
   }
   if (els.channelBreakdown) {
     els.channelBreakdown.innerHTML =
-      '<div class="h-4 w-40 bg-stone-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>';
+      '<div class="h-4 w-40 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>';
   }
 }
 
@@ -1016,8 +1073,8 @@ function renderBrandPulse(stats) {
   if (dot) {
     dot.className =
       "inline-block h-1.5 w-1.5 rounded-full animate-pulse bg-" +
-      (color === "teal"
-        ? "teal-500"
+      (color === "indigo"
+        ? "indigo-500"
         : color === "rose"
           ? "rose-500"
           : "zinc-400");
@@ -1032,7 +1089,12 @@ function renderKpiCards(stats) {
   const { total, positive, neutral, negative, avgScore, reachPerMention } =
     stats;
 
-  const sentimentScoreText = avgScore > 0 ? "text-teal-600 dark:text-teal-400" : avgScore < 0 ? "text-rose-600 dark:text-rose-400" : "text-stone-600 dark:text-zinc-400";
+  const sentimentScoreText = avgScore > 0 ? "text-indigo-600 dark:text-indigo-400" : avgScore < 0 ? "text-rose-600 dark:text-rose-400" : "text-zinc-600 dark:text-zinc-400";
+
+  const competitorStats = state.isCompareMode && state.compareBrand
+    ? computeStats(filterByBrandAndRange(state.rawMentions, state.compareBrand, state.dateRange, state.channels))
+    : null;
+  const benchmarkScore = competitorStats ? competitorStats.avgScore.toFixed(2) : "0.12";
 
   // AI Insights Logic
   const insightsPanel = document.getElementById("ai-insights-panel");
@@ -1046,6 +1108,7 @@ function renderKpiCards(stats) {
         <li>Overall sentiment for <b>${state.selectedBrand}</b> is <b>${sentimentTrend}</b>.</li>
         <li>The primary driver of discussion is concentrated on <b>${topPlatform}</b>.</li>
         ${total > 5 ? `<li>AI recommends <b>${avgScore < 0 ? 'Urgent Engagement' : 'Amplification'}</b> based on current volume of ${total} mentions.</li>` : ''}
+        ${competitorStats ? `<li>Comparing against <b>${state.compareBrand}</b>: they currently stand at a sentiment score of ${benchmarkScore}. <b>${avgScore >= competitorStats.avgScore ? 'You are leading.' : 'They are leading.'}</b></li>` : ''}
       `;
     } else {
       insightsPanel.classList.add("hidden");
@@ -1053,40 +1116,42 @@ function renderKpiCards(stats) {
   }
 
   els.kpiCards.innerHTML = `
-    <div data-card class="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/80 px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-zinc-950/50">
-      <p class="text-[10px] font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-[0.18em]">Total mentions</p>
-      <p class="text-2xl font-semibold text-stone-900 dark:text-zinc-100">${total}</p>
-      <p class="text-[11px] text-stone-500 dark:text-zinc-500">Across all sources & range</p>
+    <div data-card class="relative overflow-hidden rounded-xl border border-zinc-200/50 dark:border-white/5 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
+      <div class="absolute -right-4 -top-4 w-16 h-16 bg-zinc-300/20 dark:bg-zinc-800/30 rounded-full blur-2xl"></div>
+      <p class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.18em]">Total mentions</p>
+      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">${total}</p>
+      <p class="text-[11px] text-zinc-500 dark:text-zinc-500">Across all sources & range</p>
     </div>
-    <div data-card class="rounded-xl border border-teal-500/30 dark:border-teal-500/25 bg-teal-50/80 dark:bg-teal-500/5 px-4 py-3.5 flex flex-col gap-1.5">
-    <div data-card class="rounded-xl border border-teal-500/30 dark:border-teal-500/20 bg-teal-50/80 dark:bg-teal-500/5 px-4 py-3.5 flex flex-col gap-1.5">
+    <div data-card class="relative overflow-hidden rounded-xl border border-indigo-500/20 dark:border-indigo-400/10 bg-indigo-50/50 dark:bg-indigo-900/10 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
+      <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-500/20 dark:bg-indigo-500/10 rounded-full blur-2xl"></div>
       <div class="flex items-center justify-between">
-        <p class="text-[10px] font-medium text-teal-700 dark:text-teal-400 uppercase tracking-[0.18em]">Sentiment score</p>
-        ${state.isCompareMode ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">VS ${state.compareBrand}</span>` : ''}
+        <p class="text-[10px] font-medium text-indigo-700 dark:text-indigo-400 uppercase tracking-[0.18em]">Sentiment score</p>
+        ${state.isCompareMode && state.compareBrand ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400">VS ${state.compareBrand}</span>` : ''}
       </div>
-      <p class="text-2xl font-semibold ${sentimentScoreText}">${avgScore.toFixed(2)}</p>
-      <p class="text-[11px] text-teal-600/90 dark:text-teal-400/80">
-        ${state.isCompareMode ? `Benchmark: <span class="font-bold">0.12</span> avg` : 'Higher is more positive'}
+      <p class="text-2xl font-bold ${sentimentScoreText}">${avgScore.toFixed(2)}</p>
+      <p class="text-[11px] text-indigo-600/90 dark:text-indigo-400/80">
+        ${state.isCompareMode && state.compareBrand ? `Benchmark: <span class="font-bold">${benchmarkScore}</span> avg` : 'Higher is more positive'}
       </p>
     </div>
-    </div>
-    <div data-card class="rounded-xl border border-amber-500/25 dark:border-amber-500/20 bg-amber-50/80 dark:bg-amber-500/5 px-4 py-3.5 flex flex-col gap-1.5">
-      <p class="text-[10px] font-medium text-amber-700 dark:text-amber-400 uppercase tracking-[0.18em]">Sentiment split</p>
+    <div data-card class="relative overflow-hidden rounded-xl border border-purple-500/20 dark:border-purple-400/10 bg-purple-50/50 dark:bg-purple-900/10 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
+      <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/20 dark:bg-purple-500/10 rounded-full blur-2xl"></div>
+      <p class="text-[10px] font-medium text-purple-700 dark:text-purple-400 uppercase tracking-[0.18em]">Sentiment split</p>
       <div class="flex items-baseline gap-3 text-xs">
-        <span class="text-teal-600 dark:text-teal-400">${roundedPercent(positive, total)}% <span class="text-stone-500 dark:text-zinc-500">pos</span></span>
-        <span class="text-stone-600 dark:text-zinc-400">${roundedPercent(neutral, total)}% <span class="text-stone-500 dark:text-zinc-500">neutral</span></span>
-        <span class="text-rose-600 dark:text-rose-400">${roundedPercent(negative, total)}% <span class="text-stone-500 dark:text-zinc-500">neg</span></span>
+        <span class="text-indigo-600 dark:text-indigo-400">${roundedPercent(positive, total)}% <span class="text-zinc-500 dark:text-zinc-500">pos</span></span>
+        <span class="text-zinc-600 dark:text-zinc-400">${roundedPercent(neutral, total)}% <span class="text-zinc-500 dark:text-zinc-500">neutral</span></span>
+        <span class="text-rose-600 dark:text-rose-400">${roundedPercent(negative, total)}% <span class="text-zinc-500 dark:text-zinc-500">neg</span></span>
       </div>
-      <div class="mt-1.5 h-2 w-full rounded-full bg-stone-200 dark:bg-zinc-800 overflow-hidden flex">
-        <div style="width:${roundedPercent(positive, total)}%;" class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-l-full"></div>
-        <div style="width:${roundedPercent(neutral, total)}%;" class="bg-stone-400 dark:bg-zinc-600"></div>
-        <div style="width:${roundedPercent(negative, total)}%;" class="bg-gradient-to-r from-rose-500 to-rose-600 rounded-r-full"></div>
+      <div class="mt-1.5 h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800/60 overflow-hidden flex border border-zinc-300/30 dark:border-zinc-700/50 shadow-inner">
+        <div style="width:${roundedPercent(positive, total)}%;" class="bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-l-full shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
+        <div style="width:${roundedPercent(neutral, total)}%;" class="bg-zinc-300 dark:bg-zinc-700"></div>
+        <div style="width:${roundedPercent(negative, total)}%;" class="bg-gradient-to-r from-rose-400 to-rose-500 rounded-r-full shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
       </div>
     </div>
-    <div data-card class="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-4 py-3.5 flex flex-col gap-1.5">
-      <p class="text-[10px] font-medium text-stone-600 dark:text-zinc-400 uppercase tracking-[0.18em]">Avg reach</p>
-      <p class="text-2xl font-semibold text-stone-900 dark:text-zinc-100">${Math.round(reachPerMention).toLocaleString()}</p>
-      <p class="text-[11px] text-stone-500 dark:text-zinc-500">Avg. impact per mention</p>
+    <div data-card class="relative overflow-hidden rounded-xl border border-zinc-200/50 dark:border-white/5 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
+      <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full blur-2xl"></div>
+      <p class="text-[10px] font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-[0.18em]">Avg reach</p>
+      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">${Math.round(reachPerMention).toLocaleString()}</p>
+      <p class="text-[11px] text-zinc-500 dark:text-zinc-500">Avg. impact per mention</p>
     </div>
   `;
 }
@@ -1117,6 +1182,14 @@ function renderTrendChart(stats) {
     // Check if Chart is loaded
     if (typeof Chart === "undefined") return;
 
+    const isDark = themeState.current === "dark";
+    const gridColor = isDark ? "#27272a" : "#e5e7eb";
+    const tickColor = isDark ? "#71717a" : "#78716c";
+    const tooltipBg = isDark ? "#18181b" : "#ffffff";
+    const tooltipTitle = isDark ? "#a1a1aa" : "#57534e";
+    const tooltipBody = isDark ? "#fafafa" : "#1c1917";
+    const tooltipBorder = isDark ? "#27272a" : "#e5e7eb";
+
     state.chartInstance = new Chart(els.trendChartCanvas, {
       type: state.chartType,
       data: {
@@ -1125,8 +1198,8 @@ function renderTrendChart(stats) {
           {
             label: "Positive",
             data: posData,
-            backgroundColor: "#14b8a6", // teal-500
-            borderColor: "#14b8a6",
+            backgroundColor: "#6366f1", // indigo-500
+            borderColor: "#6366f1",
             tension: 0.35,
             borderRadius: 4,
             barThickness: 12,
@@ -1158,10 +1231,10 @@ function renderTrendChart(stats) {
           tooltip: {
             mode: "index",
             intersect: false,
-            backgroundColor: "#18181b",
-            titleColor: "#a1a1aa",
-            bodyColor: "#fafafa",
-            borderColor: "#27272a",
+            backgroundColor: tooltipBg,
+            titleColor: tooltipTitle,
+            bodyColor: tooltipBody,
+            borderColor: tooltipBorder,
             borderWidth: 1,
             padding: 10,
             displayColors: true,
@@ -1171,11 +1244,11 @@ function renderTrendChart(stats) {
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "#71717a", font: { size: 10 } },
+            ticks: { color: tickColor, font: { size: 10 } },
           },
           y: {
-            grid: { color: "#27272a" },
-            ticks: { color: "#71717a", font: { size: 10 } },
+            grid: { color: gridColor },
+            ticks: { color: tickColor, font: { size: 10 } },
             beginAtZero: true,
           },
         },
@@ -1204,7 +1277,7 @@ function renderMentionsList(view) {
 
   if (!total) {
     els.mentionsList.innerHTML =
-      '<div class="text-xs text-stone-500 dark:text-zinc-500 py-4 text-center">No mentions for this selection yet.</div>';
+      '<div class="text-xs text-zinc-500 dark:text-zinc-500 py-4 text-center">No mentions for this selection yet.</div>';
     return;
   }
 
@@ -1214,8 +1287,9 @@ function renderMentionsList(view) {
     youtube: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
     tiktok: "bg-zinc-950/10 text-zinc-900 dark:text-zinc-100 border-zinc-950/25",
     reddit: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/25",
-    news: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25",
-    reviews: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/25",
+    news: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/25",
+    reviews: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/25",
+    news_rss: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
   };
 
   const sourceTypeIcons = {
@@ -1223,41 +1297,42 @@ function renderMentionsList(view) {
     comment: "ph ph-chats-teardrop",
     post: "ph ph-article",
     review: "ph ph-star-half",
+    article: "ph ph-newspaper",
   };
 
   els.mentionsList.innerHTML = pageItems
     .map((m) => {
       const color = sentimentColor(m.sentimentScore);
       const borderColor =
-        color === "teal"
-          ? "border-teal-500/25"
+        color === "indigo"
+          ? "border-indigo-500/25"
           : color === "rose"
             ? "border-rose-500/25"
             : "border-zinc-600/70 dark:border-zinc-700/70";
       const badgeColor =
-        color === "teal"
-          ? "bg-teal-500/10 text-teal-600 dark:text-teal-400"
+        color === "indigo"
+          ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
           : color === "rose"
             ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-            : "bg-zinc-500/10 text-stone-600 dark:text-zinc-400";
+            : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400";
 
       const channelClass =
         channelStyles[m.channel] ||
-        "bg-zinc-200/60 dark:bg-zinc-800/60 text-stone-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700";
+        "bg-zinc-200/60 dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700";
 
       const sourceIcon = sourceTypeIcons[m.sourceType] || "ph ph-globe";
-      const author = m.author ? `<span class="font-medium text-stone-700 dark:text-zinc-300">@${m.author}</span>` : "";
+      const author = m.author ? `<span class="font-medium text-zinc-700 dark:text-zinc-300">@${m.author}</span>` : "";
 
       return `
         <button type="button" data-mention-id="${m.id}"
-          class="w-full text-left rounded-xl border ${borderColor} bg-white dark:bg-zinc-900/80 px-3.5 py-3.5 shadow-sm dark:shadow-zinc-950/50 flex flex-col gap-2 hover:border-stone-300 dark:hover:border-zinc-600 transition-colors">
+          class="w-full text-left rounded-xl border ${borderColor} bg-white/70 dark:bg-zinc-900/50 backdrop-blur-sm px-3.5 py-3.5 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] flex flex-col gap-2 hover:border-zinc-300 dark:hover:border-zinc-500 transition-all hover:translate-y-[-1px]">
           <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2 text-[11px] text-stone-500 dark:text-zinc-500">
-              <span class="rounded-md px-2 py-0.5 border ${channelClass} flex items-center gap-1">
+            <div class="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+              <span class="rounded-md px-2 py-0.5 border ${channelClass} flex items-center gap-1 shadow-sm">
                 <i class="${sourceIcon}"></i>
                 ${m.channel} ${m.sourceType ? `• ${m.sourceType}` : ""}
               </span>
-              <span class="text-[10px] text-stone-400 dark:text-zinc-500">
+              <span class="text-[10px] text-zinc-400 dark:text-zinc-500">
                 ${formatRelativeTime(m.timestamp)}
               </span>
             </div>
@@ -1267,11 +1342,11 @@ function renderMentionsList(view) {
           </div>
           <div class="flex flex-col gap-1">
             ${author}
-            <p class="text-xs text-stone-900 dark:text-zinc-100 leading-relaxed">
+            <p class="text-xs text-zinc-900 dark:text-zinc-100 leading-relaxed">
               ${m.text}
             </p>
           </div>
-          <div class="flex items-center justify-between text-[10px] text-stone-500 dark:text-zinc-500">
+          <div class="flex items-center justify-between text-[10px] text-zinc-500 dark:text-zinc-500">
             <span>Reach: ${m.reach.toLocaleString()}</span>
             <span>AI Score: ${m.sentimentScore.toFixed(2)}</span>
           </div>
@@ -1297,27 +1372,27 @@ function renderDistribution(stats) {
   const { total, positive, neutral, negative } = stats;
 
   els.sentimentDistribution.innerHTML = `
-    <h4 class="text-[11px] font-semibold text-teal-800 dark:text-teal-300 mb-1.5">Sentiment distribution</h4>
-    <p class="text-[11px] text-teal-700/90 dark:text-teal-400/80 mb-3">
+    <h4 class="text-[11px] font-semibold text-indigo-800 dark:text-indigo-300 mb-1.5">Sentiment distribution</h4>
+    <p class="text-[11px] text-indigo-700/90 dark:text-indigo-400/80 mb-3">
       ${total ? "Share of mentions by sentiment." : "No data in this range."}
     </p>
     <div class="space-y-2.5">
       <div class="flex items-center justify-between gap-2 text-[11px]">
-        <span class="flex items-center gap-1.5 text-stone-700 dark:text-zinc-300">
-          <span class="h-2 w-2 rounded-full bg-teal-500"></span>
+        <span class="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
+          <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
           Positive
         </span>
-        <span class="text-teal-600 dark:text-teal-400 font-medium">${positive} • ${roundedPercent(positive, total)}%</span>
+        <span class="text-indigo-600 dark:text-indigo-400 font-medium">${positive} • ${roundedPercent(positive, total)}%</span>
       </div>
       <div class="flex items-center justify-between gap-2 text-[11px]">
-        <span class="flex items-center gap-1.5 text-stone-700 dark:text-zinc-300">
+        <span class="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
           <span class="h-2 w-2 rounded-full bg-zinc-400"></span>
           Neutral
         </span>
-        <span class="text-stone-600 dark:text-zinc-400 font-medium">${neutral} • ${roundedPercent(neutral, total)}%</span>
+        <span class="text-zinc-600 dark:text-zinc-400 font-medium">${neutral} • ${roundedPercent(neutral, total)}%</span>
       </div>
       <div class="flex items-center justify-between gap-2 text-[11px]">
-        <span class="flex items-center gap-1.5 text-stone-700 dark:text-zinc-300">
+        <span class="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
           <span class="h-2 w-2 rounded-full bg-rose-500"></span>
           Negative
         </span>
@@ -1341,8 +1416,8 @@ function renderChannelBreakdown(mentions, total) {
 
   if (!byChannel.size) {
     els.channelBreakdown.innerHTML = `
-      <h4 class="text-[11px] font-semibold text-amber-800 dark:text-amber-300 mb-1.5">Channel performance</h4>
-      <p class="text-[11px] text-amber-700/90 dark:text-amber-400/80">No active channels for this selection.</p>
+      <h4 class="text-[11px] font-semibold text-purple-800 dark:text-purple-300 mb-1.5">Channel performance</h4>
+      <p class="text-[11px] text-purple-700/90 dark:text-purple-400/80">No active channels for this selection.</p>
     `;
     return;
   }
@@ -1353,20 +1428,20 @@ function renderChannelBreakdown(mentions, total) {
       const label = sentimentLabelFromScore(avg);
       const color = sentimentColor(avg);
       const textColor =
-        color === "teal"
-          ? "text-teal-600 dark:text-teal-400"
+        color === "indigo"
+          ? "text-indigo-600 dark:text-indigo-400"
           : color === "rose"
             ? "text-rose-600 dark:text-rose-400"
-            : "text-stone-600 dark:text-zinc-400";
+            : "text-zinc-600 dark:text-zinc-400";
       return `
         <div class="flex items-center justify-between text-[11px] py-1.5">
           <div class="flex flex-col">
-            <span class="capitalize text-stone-800 dark:text-zinc-200 font-medium">${channel}</span>
-            <span class="text-[10px] text-stone-500 dark:text-zinc-500">${count} mentions • ${roundedPercent(count, total || count)}% share</span>
+            <span class="capitalize text-zinc-800 dark:text-zinc-200 font-medium">${channel}</span>
+            <span class="text-[10px] text-zinc-500 dark:text-zinc-500">${count} mentions • ${roundedPercent(count, total || count)}% share</span>
           </div>
           <div class="text-right">
             <p class="${textColor} font-medium">${label}</p>
-            <p class="text-[10px] text-stone-500 dark:text-zinc-500">${avg.toFixed(2)} score</p>
+            <p class="text-[10px] text-zinc-500 dark:text-zinc-500">${avg.toFixed(2)} score</p>
           </div>
         </div>
       `;
@@ -1374,9 +1449,9 @@ function renderChannelBreakdown(mentions, total) {
     .join("");
 
   els.channelBreakdown.innerHTML = `
-    <h4 class="text-[11px] font-semibold text-amber-800 dark:text-amber-300 mb-1.5">Channel performance</h4>
-    <p class="text-[11px] text-amber-700/90 dark:text-amber-400/80 mb-2">Which channels drive the strongest sentiment.</p>
-    <div class="divide-y divide-stone-200 dark:divide-zinc-700">
+    <h4 class="text-[11px] font-semibold text-purple-800 dark:text-purple-300 mb-1.5">Channel performance</h4>
+    <p class="text-[11px] text-purple-700/90 dark:text-purple-400/80 mb-2">Which channels drive the strongest sentiment.</p>
+    <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
       ${rows}
     </div>
   `;

@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from data_pipeline.scraper import fetch_youtube_comments
+from data_pipeline.scraper import fetch_youtube_comments, fetch_news_mentions
 from data_pipeline.reddit_scraper import fetch_reddit_comments
 from data_pipeline.instagram_scraper import fetch_instagram_mentions
 from data_pipeline.facebook_scraper import fetch_facebook_posts
@@ -51,7 +51,15 @@ def run_pipeline(targets: list, output_file: str = "dashboard/data/processed_men
         )
         print(f"   [{brand}] Fetched {len(fb_data)} Facebook posts.")
 
-        raw_data.extend(yt_data + rd_data + ig_data + fb_data)
+        print(f"   [{brand}] Fetching News data...")
+        nw_data = fetch_news_mentions(
+            query=brand, # Use brand name for broad news search
+            brand=brand,
+            limit=25
+        )
+        print(f"   [{brand}] Fetched {len(nw_data)} News articles.")
+
+        raw_data.extend(yt_data + rd_data + ig_data + fb_data + nw_data)
         
     if not len(raw_data):
         print("No data fetched. Exiting.")
@@ -74,6 +82,12 @@ def run_pipeline(targets: list, output_file: str = "dashboard/data/processed_men
     # 4. Sentiment Analysis
     print("4. Running Sentiment Analysis...")
     df = analyze_dataframe(df, text_column="processed_text")
+    
+    try:
+        from alerts.notifier import check_for_alerts
+        check_for_alerts(df)
+    except ImportError:
+        pass
     
     # 5. Topic Extraction
     print("5. Extracting Topics (KeyBERT)...")
@@ -104,8 +118,8 @@ def run_pipeline(targets: list, output_file: str = "dashboard/data/processed_men
         for row in df.itertuples():
             conn.execute('''
                 INSERT OR REPLACE INTO mentions (
-                    id, brand, channel, text, author, published_at, reach, vader_score, vader_label
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, brand, channel, text, author, published_at, reach, vader_score, vader_label, url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 str(getattr(row, 'id', '')),
                 getattr(row, 'brand', 'Unknown'),
@@ -115,7 +129,8 @@ def run_pipeline(targets: list, output_file: str = "dashboard/data/processed_men
                 str(getattr(row, 'published_at', '')),
                 int(getattr(row, 'reach', 0)),
                 float(getattr(row, 'vader_score', 0.0)),
-                str(getattr(row, 'vader_label', 'neutral'))
+                str(getattr(row, 'vader_label', 'neutral')),
+                getattr(row, 'url', '')
             ))
         conn.commit()
         print(f"✅ Successfully persisted {len(df)} records to SQLite database ({db_path}).")
@@ -157,6 +172,41 @@ if __name__ == "__main__":
             "reddit_kw": "Pixel",
             "ig_keyword": "GooglePixel",
             "fb_keyword": "Pixel"
+        },
+        {
+            "brand": "Microsoft",
+            "youtube_query": "Microsoft Surface Laptop review 2024",
+            "reddit_kw": "Surface",
+            "ig_keyword": "Surface",
+            "fb_keyword": "Surface"
+        },
+        {
+            "brand": "Sony",
+            "youtube_query": "Sony PlayStation 5 PS5 review",
+            "reddit_kw": "PS5",
+            "ig_keyword": "PlayStation5",
+            "fb_keyword": "PS5"
+        },
+        {
+            "brand": "Tesla",
+            "youtube_query": "Tesla Model Y review 2024",
+            "reddit_kw": "Tesla",
+            "ig_keyword": "TeslaModelY",
+            "fb_keyword": "ModelY"
+        },
+        {
+            "brand": "Amazon",
+            "youtube_query": "Amazon Echo Alexa review",
+            "reddit_kw": "Alexa",
+            "ig_keyword": "Kindle",
+            "fb_keyword": "Echo"
+        },
+        {
+            "brand": "Meta",
+            "youtube_query": "Meta Quest 3 VR review",
+            "reddit_kw": "MetaQuest",
+            "ig_keyword": "Quest3",
+            "fb_keyword": "MetaQuest"
         }
     ]
     run_pipeline(targets, output_file="dashboard/data/processed_mentions.json")

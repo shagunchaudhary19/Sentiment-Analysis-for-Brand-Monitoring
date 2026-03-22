@@ -1,5 +1,8 @@
 import os
 import json
+import feedparser
+import time
+from datetime import datetime
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
 
@@ -49,7 +52,8 @@ def fetch_youtube_comments(query: str, brand: str = "Unknown", max_results: int 
                 "author": snippet.get("channelTitle", "Unknown"),
                 "published_at": snippet.get("publishedAt", ""),
                 "channel": "youtube",
-                "reach": 0  # view count requires a separate Videos.list call
+                "reach": 0,  # view count requires a separate Videos.list call
+                "url": f"https://youtube.com/watch?v={video_id}" if video_id else ""
             })
 
     except Exception as e:
@@ -124,6 +128,44 @@ def _mock_youtube_data(keyword: str, brand: str, limit: int = 5):
     ]
     return base[:limit]
 
+
+def fetch_news_mentions(query: str, brand: str = "Unknown", limit: int = 20):
+    """
+    Fetches real-time news headlines from Google News RSS for the given brand/keyword.
+    Does NOT require an API key!
+    """
+    import urllib.parse
+    encoded_query = urllib.parse.quote(query)
+    rss_url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
+    
+    print(f"[News] Fetching real-time news for '{query}'...")
+    
+    mentions = []
+    try:
+        feed = feedparser.parse(rss_url)
+        
+        for entry in feed.entries[:limit]:
+            # entry.published format: "Sun, 22 Mar 2026 12:00:00 GMT"
+            # We'll keep it as a string for now, to be consistent with other scrapers
+            
+            mentions.append({
+                "id": entry.get("id", f"news_{time.time()}_{hash(entry.link)}"),
+                "brand": brand,
+                "text": f"{entry.title}. {entry.get('summary', '')[:200]}",
+                "author": entry.get("source", {}).get("title", "News Outlet"),
+                "published_at": entry.get("published", ""),
+                "channel": "news",
+                "reach": 5000, # News has base higher reach
+                "url": entry.link
+            })
+            
+    except Exception as e:
+        print(f"[News] RSS Error: {e}")
+        
+    if not mentions:
+        print(f"[News] No results for '{query}'.")
+        
+    return mentions
 
 if __name__ == "__main__":
     results = fetch_youtube_comments("iPhone 15", brand="Apple", max_results=10)

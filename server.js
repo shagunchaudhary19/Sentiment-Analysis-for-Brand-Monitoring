@@ -56,7 +56,8 @@ async function getMentionsFromDB(limit = 100) {
         sentimentScore: m.vader_score || 0,
         sentimentLabel: m.vader_label || "neutral",
         timestamp: m.published_at ? new Date(m.published_at).getTime() : Date.now(),
-        reach: m.reach || 0
+        reach: m.reach || 0,
+        url: m.url || ""
       }));
       
       db.close();
@@ -121,7 +122,8 @@ app.get("/api/fetch-live", async (req, res) => {
           author: video.snippet.channelTitle,
           text: video.snippet.title + ": " + video.snippet.description.substring(0, 100),
           timestamp: new Date(video.snippet.publishedAt).getTime(),
-          reach: Math.floor(Math.random() * 100000) + 5000
+          reach: Math.floor(Math.random() * 100000) + 5000,
+          url: `https://youtube.com/watch?v=${video.id.videoId}`
         };
       }
     } catch (err) {
@@ -158,7 +160,8 @@ app.get("/api/fetch-live", async (req, res) => {
             author: "instagram_user",
             text: post.caption ? post.caption.substring(0, 280) : `#${hashtag}`,
             timestamp: post.timestamp ? new Date(post.timestamp).getTime() : Date.now(),
-            reach: (post.like_count || 0) + (post.comments_count || 0) * 3
+            reach: (post.like_count || 0) + (post.comments_count || 0) * 3,
+            url: post.permalink || `https://instagram.com/p/${post.id}`
           };
         }
       }
@@ -193,7 +196,8 @@ app.get("/api/fetch-live", async (req, res) => {
           author: brand,
           text: text.substring(0, 280),
           timestamp: post.created_time ? new Date(post.created_time).getTime() : Date.now(),
-          reach: likes + comments * 5
+          reach: likes + comments * 5,
+          url: post.permalink_url || `https://facebook.com/${post.id}`
         };
       }
     } catch (err) {
@@ -221,7 +225,8 @@ app.get("/api/fetch-live", async (req, res) => {
       author: "RealUser_" + Math.floor(Math.random() * 1000),
       text: textTemplate.replace("{brand}", brand),
       timestamp: Date.now(),
-      reach: Math.floor(Math.random() * 50000) + 1000
+      reach: Math.floor(Math.random() * 50000) + 1000,
+      url: `https://${platform}.com`
     };
   }
 

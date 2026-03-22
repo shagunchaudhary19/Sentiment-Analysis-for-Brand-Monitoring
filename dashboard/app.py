@@ -21,12 +21,16 @@ if df.empty:
     st.stop()
 
 # --- TIMESTAMP FIX ---
-# Reddit provides unix timestamps, YouTube provides ISO format. Pandas `to_datetime` handles both if cleaned correctly.
 if "published_at" in df.columns:
-    # Try converting numeric strings to int first (for Reddit unix timestamps)
     def parse_date(d):
-        try: return pd.to_datetime(int(float(d)), unit='s')
-        except: return pd.to_datetime(d, errors='coerce')
+        if pd.isna(d) or d == "": return pd.NaT
+        try:
+            # Try unix timestamp
+            return pd.to_datetime(int(float(d)), unit='s', utc=True)
+        except:
+            # Try ISO or other formats
+            return pd.to_datetime(d, errors='coerce', utc=True)
+    
     df["published_at"] = df["published_at"].apply(parse_date)
 
 # =======================
