@@ -1,1466 +1,935 @@
-// Simple, framework-free dashboard logic for AI-based brand sentiment monitoring.
-// All data is mocked here – replace loadMockData() with your own API integration.
-
 /**
- * @typedef {Object} Mention
- * @property {string} id
- * @property {string} brand
- * @property {string} channel - e.g. 'twitter' | 'instagram' | 'news' | 'reviews'
- * @property {string} text
- * @property {number} sentimentScore - -1 (very negative) to 1 (very positive)
- * @property {string} sentimentLabel - 'positive' | 'neutral' | 'negative'
- * @property {number} timestamp - Unix ms
- * @property {number} reach - impact metric (followers, views, etc.)
+ * BrandWatch Dashboard Logic
+ * Handles Authentication, Real-time Mentions, AI Insights, and Data Visualization.
  */
 
-function loadMockData() {
-  // Local fallback if API is down
-  return [
-    {
-      id: "fallback-1",
-      brand: "Apple",
-      channel: "twitter",
-      text: "fallback: Loving the new MacBook Pro performance.",
-      sentimentScore: 0.9,
-      sentimentLabel: "positive",
-      timestamp: Date.now() - 3600000,
-      reach: 10000,
-    }
-  ];
-}
-
-async function fetchMentionsFromApi() {
-  try {
-    const res = await fetch("/api/mentions");
-    if (!res.ok) {
-      throw new Error("Bad status " + res.status);
-    }
-    const data = await res.json();
-    if (!data || !Array.isArray(data.mentions)) {
-      throw new Error("Invalid payload shape");
-    }
-    return data.mentions;
-  } catch (err) {
-    console.warn("Falling back to local mock data:", err);
-    return loadMockData();
-  }
-}
-
-function uniqueBrands(mentions) {
-  const set = new Set(mentions.map((m) => m.brand));
-  return Array.from(set);
-}
-
-function filterByBrandAndRange(mentions, brand, range, channels) {
-  const now = Date.now();
-  const ranges = {
-    "24h": 24,
-    "7d": 24 * 7,
-    "30d": 24 * 30,
-  };
-  const hoursBack = ranges[range] ?? 24;
-  const minTimestamp = now - hoursBack * 60 * 60 * 1000;
-
-  return mentions.filter((m) => {
-    if (brand && m.brand !== brand) return false;
-    if (m.timestamp < minTimestamp) return false;
-    if (channels && channels.length && !channels.includes(m.channel)) {
-      return false;
-    }
-    return true;
-  });
-}
-
-function computeStats(mentions) {
-  const total = mentions.length;
-  let positive = 0;
-  let neutral = 0;
-  let negative = 0;
-  let scoreSum = 0;
-  let reachSum = 0;
-
-  const byBucket = new Map(); // time bucket for chart
-
-  for (const m of mentions) {
-    scoreSum += m.sentimentScore;
-    reachSum += m.reach;
-    if (m.sentimentLabel === "positive") positive++;
-    else if (m.sentimentLabel === "negative") negative++;
-    else neutral++;
-
-    const bucketKey = bucketTimestamp(m.timestamp);
-    if (!byBucket.has(bucketKey)) {
-      byBucket.set(bucketKey, { positive: 0, negative: 0 });
-    }
-    const bucket = byBucket.get(bucketKey);
-    if (m.sentimentLabel === "positive") bucket.positive++;
-    if (m.sentimentLabel === "negative") bucket.negative++;
-  }
-
-  const avgScore = total ? scoreSum / total : 0;
-  const reachPerMention = total ? reachSum / total : 0;
-
-  return {
-    total,
-    positive,
-    neutral,
-    negative,
-    avgScore,
-    reachPerMention,
-    byBucket,
-  };
-}
-
-function bucketTimestamp(ts) {
-  const d = new Date(ts);
-  const range = state?.dateRange || "24h";
-
-  // 24h: hourly buckets, 7d/30d: daily buckets
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  if (range === "24h") {
-    const hh = String(d.getHours()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd} ${hh}:00`;
-  }
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function formatBucketLabel(bucketKey) {
-  const range = state?.dateRange || "24h";
-  if (range === "24h") {
-    // "YYYY-MM-DD HH:00" -> "HH:00"
-    const parts = bucketKey.split(" ");
-    return parts[1] || bucketKey;
-  }
-  // "YYYY-MM-DD" -> "MM/DD"
-  const [yyyy, mm, dd] = bucketKey.split("-");
-  if (!yyyy || !mm || !dd) return bucketKey;
-  return `${mm}/${dd}`;
-}
-
-function formatRelativeTime(ts) {
-  const diffMs = Date.now() - ts;
-  const diffSec = Math.round(diffMs / 1000);
-  const diffMin = Math.round(diffSec / 60);
-  const diffHr = Math.round(diffMin / 60);
-  const diffDay = Math.round(diffHr / 24);
-
-  if (diffSec < 45) return "just now";
-  if (diffMin < 60) return `${diffMin} min ago`;
-  if (diffHr < 24) return `${diffHr} hr ago`;
-  if (diffDay === 1) return "yesterday";
-  return `${diffDay} days ago`;
-}
-
-function sentimentLabelFromScore(score) {
-  if (score > 0.2) return "Positive";
-  if (score < -0.2) return "Negative";
-  return "Neutral";
-}
-
-function sentimentColor(score) {
-  if (score > 0.2) return "indigo";
-  if (score < -0.2) return "rose";
-  return "zinc";
-}
-
-function roundedPercent(part, total) {
-  if (!total) return 0;
-  return Math.round((part / total) * 100);
-}
-
-// DOM hooks
-const els = {
-  brandSelect: document.getElementById("brand-select"),
-  compareToggle: document.getElementById("compare-toggle"),
-  compareSelect: document.getElementById("compare-select"),
-  dateRangeToggle: document.getElementById("date-range-toggle"),
-  brandPulse: document.getElementById("brand-sentiment-pulse"),
-  kpiCards: document.getElementById("kpi-cards"),
-  trendChart: document.getElementById("trend-chart"),
-  mentionsList: document.getElementById("mentions-list"),
-  mentionsCountPill: document.getElementById("mentions-count-pill"),
-  sentimentDistribution: document.getElementById("sentiment-distribution"),
-  channelBreakdown: document.getElementById("channel-breakdown"),
-  themeToggle: document.getElementById("theme-toggle"),
-  mentionsSearch: document.getElementById("mentions-search"),
-  mentionsSort: document.getElementById("mentions-sort"),
-  highImpactToggle: document.getElementById("high-impact-toggle"),
-  mentionsPrev: document.getElementById("mentions-prev"),
-  mentionsNext: document.getElementById("mentions-next"),
-  mentionsPaginationLabel: document.getElementById("mentions-pagination-label"),
-  chartTypeToggle: document.getElementById("chart-type-toggle"),
-  sidebar: document.getElementById("sidebar"),
-  sidebarOverlay: document.getElementById("sidebar-overlay"),
-  openSidebarBtn: document.getElementById("open-sidebar"),
-  closeSidebarBtn: document.getElementById("close-sidebar"),
-  toastContainer: document.getElementById("toast-container"),
-  trendChartCanvas: document.getElementById("trend-chart-canvas"),
-  mentionDrawerOverlay: document.getElementById("mention-drawer-overlay"),
-  mentionDrawer: document.getElementById("mention-drawer"),
-  mentionDrawerClose: document.getElementById("mention-drawer-close"),
-  mentionDrawerTitle: document.getElementById("mention-drawer-title"),
-  mentionDrawerChannel: document.getElementById("mention-drawer-channel"),
-  mentionDrawerTime: document.getElementById("mention-drawer-time"),
-  mentionDrawerBrand: document.getElementById("mention-drawer-brand"),
-  mentionDrawerText: document.getElementById("mention-drawer-text"),
-  mentionDrawerSentiment: document.getElementById("mention-drawer-sentiment"),
-  mentionDrawerReach: document.getElementById("mention-drawer-reach"),
-  mentionDrawerUrl: document.getElementById("mention-drawer-url"),
-  platformFilterBtns: document.getElementById("platform-filter-btns"),
-  clearFiltersBtn: document.getElementById("clear-filters-btn"),
-};
-
 const state = {
-  rawMentions: [],
-  selectedBrand: null,
-  isCompareMode: false,
-  compareBrand: null,
-  dateRange: "24h",
-  // Supported sources for the UI
-  channels: ["reddit", "youtube"],
-  searchQuery: "",
-  highImpactOnly: false,
-  sort: "latest",
-  page: 1,
-  pageSize: 10,
-  chartType: "bar",
-  selectedMentionId: null,
-  status: "loading", // loading | ready | error
-  errorMessage: null,
-  chartInstance: null,
+    user: null,
+    rawMentions: [],
+    selectedBrand: null,
+    dateRange: "24h",
+    channels: ["youtube", "twitter", "tiktok", "instagram", "reddit"],
+    sort: "latest",
+    page: 1,
+    pageSize: 10,
+    status: "loading",
+    chartType: "bar",
+    activeSection: "overview"
 };
 
-const themeState = {
-  current: "dark",
+const els = {
+    brandSelect: document.getElementById("brand-select"),
+    kpiCards: document.getElementById("kpi-cards"),
+    mentionsList: document.getElementById("mentions-list"),
+    aiAnalyzeBtn: document.getElementById("ai-brain-btn"),
+    aiInsightBanner: document.getElementById("ai-banner"),
+    aiInsightBannerText: document.getElementById("ai-banner-text"),
+    liveSyncBtn: document.getElementById("live-sync-btn"),
+    addBrandBtn: document.getElementById("add-brand-btn"),
+    userName: document.getElementById("user-name"),
+    userAvatar: document.getElementById("user-avatar"),
+    dateRangeToggle: document.getElementById("date-range-toggle"),
+    mentionsSearch: document.getElementById("mentions-search"),
+    mentionsSort: document.getElementById("mentions-sort"),
+    mentionsPrev: document.getElementById("mentions-prev"),
+    mentionsNext: document.getElementById("mentions-next"),
+    mentionsPaginationLabel: document.getElementById("mentions-pagination"),
+    chartTypeToggle: document.getElementById("chart-type-toggle"),
+    toastContainer: document.getElementById("toast-container"),
+    pageTitle: document.getElementById("page-title"),
+    pageSub: document.getElementById("page-sub"),
+    onboardModal: document.getElementById("brand-onboard-modal"),
+    onboardInput: document.getElementById("onboard-brand-input"),
+    onboardSearchBtn: document.getElementById("onboard-search-btn"),
+    onboardSearching: document.getElementById("onboard-searching"),
+    onboardResult: document.getElementById("onboard-result"),
+    onboardLogo: document.getElementById("onboard-logo"),
+    onboardBrandName: document.getElementById("onboard-brand-name"),
+    onboardConfirmBtn: document.getElementById("onboard-confirm-btn"),
+    onboardError: document.getElementById("onboard-error"),
+    onboardRecs: document.getElementById("onboard-recommendations"),
+    distLegend: document.getElementById("dist-legend"),
+    settingsBtn: document.getElementById("settings-btn"),
+    settingsModal: document.getElementById("settings-modal")
 };
 
-const SUPPORTED_PLATFORMS = ["instagram", "facebook", "reddit", "youtube"];
-const LANDING_SOURCES_KEY = "brandSentiment.sources.v1";
-
-function sanitizePlatforms(platforms) {
-  const set = new Set(Array.isArray(platforms) ? platforms.map(String) : []);
-  const filtered = SUPPORTED_PLATFORMS.filter((p) => set.has(p));
-  return filtered.length ? filtered : ["reddit", "youtube"];
-}
-
-function loadLandingPlatforms() {
-  try {
-    const raw = localStorage.getItem(LANDING_SOURCES_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return null;
-    return sanitizePlatforms(parsed);
-  } catch {
-    return null;
-  }
-}
+let sentimentChart = null;
+let distributionChart = null;
 
 async function init() {
-  initTheme();
+    state.user = await checkAuth();
+    if (!state.user) return;
 
-  hydrateUiControls();
-  restoreFiltersFromStorage();
-  await refreshMentions();
+    if (els.userName) els.userName.textContent = state.user.name || state.user.email;
+    if (els.userAvatar) els.userAvatar.textContent = (state.user.name || state.user.email)[0].toUpperCase();
 
-  hydrateBrandSelector(uniqueBrands(state.rawMentions));
-  hydrateDateRangeToggle();
-  hydrateMentionFilters();
-  hydrateMobileMenu();
-  hydrateMentionsUi();
-  hydrateChartTypeToggle();
-  hydrateMentionDrawer();
-  hydratePlatformFilters();
-
-  // Select first brand by default
-  if (!state.selectedBrand && els.brandSelect && els.brandSelect.options.length > 0) {
-    state.selectedBrand = els.brandSelect.value;
-  }
-
-  render();
-
-  const liveAnalyzeBtn = document.getElementById("live-analyze-btn");
-  if (liveAnalyzeBtn) {
-    liveAnalyzeBtn.addEventListener("click", () => {
-      executeLiveAnalysis();
-    });
-  }
-
-  const exportBtn = document.getElementById("export-btn");
-  if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      exportSnapshot();
-    });
-  }
+    // Parallelize data fetching for faster initial load
+    await Promise.all([
+        refreshBrands(),
+        refreshMentions(),
+        refreshCrisis(),
+        refreshCompetitors(),
+        refreshTrends()
+    ]);
+    
+    render();
+    setupListeners();
 }
 
-async function executeLiveAnalysis() {
-  const btn = document.getElementById("live-analyze-btn");
-  if (!btn) return;
-
-  if (!state.selectedBrand) {
-    showToast("Please select a brand first", "info");
-    return;
-  }
-
-  btn.disabled = true;
-
-  // We'll prioritize the first active platform in the filter, or youtube as default
-  const targetPlatform = state.channels.includes("youtube") ? "youtube" : state.channels[0] || "youtube";
-
-  const platforms = ["youtube", "twitter", "tiktok", "instagram", "reddit"];
-
-  // Show progress per platform to keep the high-end feel
-  for (const p of platforms) {
-    btn.innerHTML = `<i class="ph ph-circle-notch animate-spin"></i> Reading ${p}...`;
-    await new Promise(r => setTimeout(r, 500 + Math.random() * 300));
-  }
-
-  btn.innerHTML = `<i class="ph ph-cpu animate-pulse"></i> Analyzing...`;
-
-  try {
-    const res = await fetch(`/api/fetch-live?brand=${encodeURIComponent(state.selectedBrand)}&platform=${targetPlatform}`);
-    if (!res.ok) throw new Error("Sync failed");
-
-    const data = await res.json();
-    const newMention = data.mention;
-
-    if (newMention) {
-      state.rawMentions.unshift(newMention);
-      showToast(`New ${newMention.brand} ${newMention.sourceType} found on ${newMention.channel}!`, "success");
-    }
-  } catch (err) {
-    console.error("Live Sync Error:", err);
-    showToast("Could not reach live sources. Try again later.", "error");
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = `<i class="ph ph-lightning text-purple-500"></i> Live Analyze`;
-
-  render();
-}
-
-function hydratePlatformFilters() {
-  if (!els.platformFilterBtns) return;
-
-  // Clear filters
-  if (els.clearFiltersBtn) {
-    els.clearFiltersBtn.addEventListener("click", () => {
-      state.channels = ["youtube", "twitter", "tiktok", "instagram", "reddit", "news", "reviews"];
-      state.page = 1;
-      persistFiltersToStorage();
-      render();
-    });
-  }
-
-  // Toggle individual platforms
-  els.platformFilterBtns.querySelectorAll("[data-platform]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const platform = btn.getAttribute("data-platform");
-      if (!platform) return;
-
-      const index = state.channels.indexOf(platform);
-      if (index > -1) {
-        // Remove if multiple are selected, or if we want to allow 0 (though maybe keep at least 1?)
-        if (state.channels.length > 1) {
-          state.channels.splice(index, 1);
-        } else {
-          showToast("At least one platform must be active", "info");
-          return;
+async function checkAuth() {
+    try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) {
+            window.location.href = "/login";
+            return null;
         }
-      } else {
-        state.channels.push(platform);
-      }
-
-      state.page = 1;
-      persistFiltersToStorage();
-      render();
-    });
-  });
+        const data = await res.json();
+        return data.user;
+    } catch (err) {
+        window.location.href = "/login";
+        return null;
+    }
 }
 
-function hydrateUiControls() {
-  // Normalize defaults into UI controls
-  if (els.mentionsSort) els.mentionsSort.value = state.sort;
-  if (els.highImpactToggle) els.highImpactToggle.checked = !!state.highImpactOnly;
-  if (els.mentionsSearch) els.mentionsSearch.value = state.searchQuery || "";
+async function refreshBrands() {
+    try {
+        const res = await fetch("/api/brands");
+        const data = await res.json();
+        if (data.brands && els.brandSelect) {
+            // Add "All Brands" option at the top
+            els.brandSelect.innerHTML = `<option value="All Brands">All Brands</option>` + 
+                data.brands.map(b => `<option value="${b.brand_name}">${b.brand_name}</option>`).join("");
+            
+            if (!state.selectedBrand) {
+                state.selectedBrand = "All Brands";
+                els.brandSelect.value = "All Brands";
+            }
+        }
+        
+        // Render the brand sliding bar if it exists
+        renderBrandSidebar(data.brands || []);
+    } catch (err) {
+        console.error("Failed to load brands", err);
+    }
 }
+
+function renderBrandSidebar(brands) {
+    const sidebar = document.getElementById("brand-sidebar");
+    if (!sidebar) return;
+    
+    const colors = ["#4F46E5", "#10B981", "#F43F5E", "#F59E0B", "#8B5CF6", "#EC4899", "#06B6D4"];
+    
+    sidebar.innerHTML = `
+        <button onclick="selectBrand('All Brands')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all ${state.selectedBrand === 'All Brands' ? 'bg-indigo-600 shadow-lg shadow-indigo-200 scale-110 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-400'}">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+        </button>
+        ${brands.map((b, i) => `
+            <button onclick="selectBrand('${b.brand_name}')" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-[10px] transition-all relative group ${state.selectedBrand === b.brand_name ? 'scale-110 shadow-lg' : 'hover:scale-105'}" style="background:${colors[i % colors.length]}">
+                ${b.brand_name[0]}
+                ${state.selectedBrand === b.brand_name ? `<div class="absolute -bottom-1 w-1 h-1 bg-white rounded-full"></div>` : ''}
+                <div class="absolute left-14 px-2 py-1 bg-slate-900 text-[9px] text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl">${b.brand_name}</div>
+            </button>
+        `).join("")}
+    `;
+    lucide.createIcons();
+}
+
+window.selectBrand = function(name) {
+    state.selectedBrand = name;
+    els.brandSelect.value = name;
+    init(); // Refresh everything
+};
 
 async function refreshMentions() {
-  state.status = "loading";
-  state.errorMessage = null;
-  render();
-  try {
-    const mentions = await fetchMentionsFromApi();
-    state.rawMentions = Array.isArray(mentions) ? mentions : [];
-    state.status = "ready";
-  } catch (e) {
-    state.status = "error";
-    state.errorMessage = "Failed to load mentions.";
-    showToast("Failed to load mentions", "info");
-  }
-  render();
-}
-
-function applyTheme(theme) {
-  const root = document.documentElement;
-  themeState.current = theme;
-  if (theme === "dark") {
-    root.classList.add("dark");
-    root.dataset.theme = "dark";
-    root.style.colorScheme = "dark";
-  } else {
-    root.classList.remove("dark");
-    root.dataset.theme = "light";
-    root.style.colorScheme = "light";
-  }
-}
-
-function updateThemeToggleUi(theme) {
-  if (!els.themeToggle) return;
-  const labelSpan = els.themeToggle.querySelector(".theme-label");
-  if (labelSpan) {
-    labelSpan.textContent = theme === "dark" ? "Dark" : "Light";
-  }
-}
-
-function initTheme() {
-  const stored = localStorage.getItem("theme");
-  const prefersDark =
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const initial =
-    stored === "light" || stored === "dark"
-      ? stored
-      : prefersDark
-        ? "dark"
-        : "light";
-
-  applyTheme(initial);
-  updateThemeToggleUi(initial);
-
-  if (els.themeToggle) {
-    els.themeToggle.addEventListener("click", () => {
-      const next = themeState.current === "dark" ? "light" : "dark";
-      localStorage.setItem("theme", next);
-      applyTheme(next);
-      updateThemeToggleUi(next);
-      
-      // Force chart to re-render with new theme colors
-      if (state.chartInstance) {
-        state.chartInstance.destroy();
-        state.chartInstance = null;
-        render();
-      }
-    });
-  }
-}
-
-function hydrateBrandSelector(brands) {
-  if (!els.brandSelect) return;
-  els.brandSelect.innerHTML = "";
-  if (els.compareSelect) els.compareSelect.innerHTML = `<option value="">Select competitor...</option>`;
-  
-  brands.forEach((brand) => {
-    // Populate main select
-    const opt = document.createElement("option");
-    opt.value = brand;
-    opt.textContent = brand;
-    els.brandSelect.appendChild(opt);
-    
-    // Populate compare select
-    if (els.compareSelect) {
-      const cOpt = document.createElement("option");
-      cOpt.value = brand;
-      cOpt.textContent = brand;
-      els.compareSelect.appendChild(cOpt);
+    state.status = "loading";
+    try {
+        const url = state.selectedBrand ? `/api/mentions?brand=${encodeURIComponent(state.selectedBrand)}` : "/api/mentions";
+        const res = await fetch(url);
+        const data = await res.json();
+        state.rawMentions = data.mentions || [];
+        processMentionsByThreshold();
+        state.status = "ready";
+    } catch (err) {
+        state.status = "error";
+        console.error("Failed to load mentions", err);
     }
-  });
-
-  // Restore previously selected brand if present in list
-  if (state.selectedBrand) {
-    const exists = Array.from(els.brandSelect.options).some(
-      (o) => o.value === state.selectedBrand
-    );
-    if (exists) els.brandSelect.value = state.selectedBrand;
-  }
-  if (state.compareBrand && els.compareSelect) {
-    const exists = Array.from(els.compareSelect.options).some((o) => o.value === state.compareBrand);
-    if (exists) els.compareSelect.value = state.compareBrand;
-  }
-  if (els.compareToggle) {
-    els.compareToggle.checked = state.isCompareMode;
-    if (els.compareSelect) els.compareSelect.disabled = !state.isCompareMode;
-  }
-
-  els.brandSelect.addEventListener("change", () => {
-    state.selectedBrand = els.brandSelect.value || null;
-    state.page = 1;
-    persistFiltersToStorage();
-    render();
-  });
-  
-  if (els.compareToggle && els.compareSelect) {
-    els.compareToggle.addEventListener("change", (e) => {
-      state.isCompareMode = !!e.target.checked;
-      els.compareSelect.disabled = !state.isCompareMode;
-      persistFiltersToStorage();
-      render();
-    });
-    
-    els.compareSelect.addEventListener("change", () => {
-      state.compareBrand = els.compareSelect.value || null;
-      persistFiltersToStorage();
-      render();
-    });
-  }
 }
 
-function hydrateDateRangeToggle() {
-  if (!els.dateRangeToggle) return;
-  els.dateRangeToggle.querySelectorAll("button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const range = btn.getAttribute("data-range");
-      if (!range) return;
-      state.dateRange = range;
-      state.page = 1;
-      persistFiltersToStorage();
+async function refreshCrisis() {
+    try {
+        const query = state.selectedBrand && state.selectedBrand !== "All Brands" ? `?brand=${encodeURIComponent(state.selectedBrand)}` : "";
+        const res = await fetch(`/api/alerts/crisis${query}`);
+        const data = await res.json();
+        renderCrisis(data.alerts || []);
+        
+        // Also fetch high-risk mentions for the radar
+        const hrRes = await fetch(`/api/alerts/high-risk-mentions${query}`);
+        const hrData = await hrRes.json();
+        renderHighRiskMentions(hrData.mentions || []);
 
-      // update active styles
-      els.dateRangeToggle.querySelectorAll("button").forEach((b) => {
-        if (b === btn) {
-          b.classList.add(
-            "bg-white",
-            "dark:bg-zinc-800",
-            "text-zinc-900",
-            "dark:text-zinc-100",
-            "shadow-sm",
-            "dark:shadow-zinc-950/50"
-          );
-          b.classList.remove("text-zinc-600", "dark:text-zinc-400");
-        } else {
-          b.classList.remove(
-            "bg-white",
-            "dark:bg-zinc-800",
-            "text-zinc-900",
-            "dark:text-zinc-100",
-            "shadow-sm",
-            "dark:shadow-zinc-950/50"
-          );
-          b.classList.add("text-zinc-600", "dark:text-zinc-400");
+        const badge = document.getElementById("crisis-badge");
+        if (badge) {
+            const count = data.alerts ? data.alerts.length : 0;
+            badge.textContent = count;
+            badge.classList.toggle("hidden", count === 0);
         }
-      });
-
-      render();
-    });
-  });
-
-  // Sync active styles to restored date range
-  const activeBtn = Array.from(els.dateRangeToggle.querySelectorAll("button")).find(
-    (b) => b.getAttribute("data-range") === state.dateRange
-  );
-  if (activeBtn) activeBtn.click();
-}
-
-function hydrateMentionFilters() {
-  if (els.mentionsSearch) {
-    els.mentionsSearch.addEventListener("input", (event) => {
-      const value = event.target.value || "";
-      state.searchQuery = value.toLowerCase().trim();
-      state.page = 1;
-      persistFiltersToStorage();
-      render();
-    });
-  }
-
-  if (els.highImpactToggle) {
-    els.highImpactToggle.addEventListener("change", (event) => {
-      state.highImpactOnly = !!event.target.checked;
-      state.page = 1;
-      persistFiltersToStorage();
-      render();
-    });
-  }
-}
-
-function hydrateMentionsUi() {
-  if (els.mentionsSort) {
-    els.mentionsSort.addEventListener("change", (event) => {
-      state.sort = event.target.value || "latest";
-      state.page = 1;
-      persistFiltersToStorage();
-      render();
-    });
-  }
-
-  if (els.mentionsPrev) {
-    els.mentionsPrev.addEventListener("click", () => {
-      state.page = Math.max(1, state.page - 1);
-      render();
-    });
-  }
-  if (els.mentionsNext) {
-    els.mentionsNext.addEventListener("click", () => {
-      state.page = state.page + 1;
-      render();
-    });
-  }
-}
-
-function hydrateChartTypeToggle() {
-  if (!els.chartTypeToggle) return;
-  els.chartTypeToggle.querySelectorAll("button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const next = btn.getAttribute("data-chart");
-      if (!next || (next !== "bar" && next !== "line")) return;
-      state.chartType = next;
-      updateChartTypeToggleUi();
-      render();
-    });
-  });
-  updateChartTypeToggleUi();
-}
-
-function updateChartTypeToggleUi() {
-  if (!els.chartTypeToggle) return;
-  const buttons = Array.from(els.chartTypeToggle.querySelectorAll("button"));
-  buttons.forEach((b) => {
-    const val = b.getAttribute("data-chart");
-    const active = val === state.chartType;
-    if (active) {
-      b.classList.add(
-        "bg-white",
-        "dark:bg-zinc-800",
-        "text-zinc-900",
-        "dark:text-zinc-100",
-        "shadow-sm",
-        "dark:shadow-zinc-950/50",
-        "font-medium"
-      );
-      b.classList.remove("text-zinc-600", "dark:text-zinc-400");
-    } else {
-      b.classList.remove(
-        "bg-white",
-        "dark:bg-zinc-800",
-        "text-zinc-900",
-        "dark:text-zinc-100",
-        "shadow-sm",
-        "dark:shadow-zinc-950/50",
-        "font-medium"
-      );
-      b.classList.add("text-zinc-600", "dark:text-zinc-400");
+    } catch (err) {
+        console.error("Failed to load crisis alerts", err);
     }
-  });
 }
 
-function hydrateMentionDrawer() {
-  const { mentionDrawerOverlay, mentionDrawer, mentionDrawerClose } = els;
-  if (!mentionDrawerOverlay || !mentionDrawer || !mentionDrawerClose) return;
-
-  function close() {
-    mentionDrawer.classList.add("translate-x-full");
-    mentionDrawerOverlay.classList.add("hidden");
-    state.selectedMentionId = null;
-  }
-
-  mentionDrawerClose.addEventListener("click", close);
-  mentionDrawerOverlay.addEventListener("click", close);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
-  });
+function renderHighRiskMentions(mentions) {
+    const list = document.getElementById("high-risk-list");
+    if (!list) return;
+    
+    list.innerHTML = mentions.length ? mentions.map(m => `
+        <div class="p-5 bg-white border border-slate-100 rounded-[1.5rem] flex items-center justify-between group hover:shadow-lg hover:shadow-slate-200/50 transition-all cursor-pointer" onclick='openMentionDrawer(${JSON.stringify(m).replace(/'/g, "&apos;")})'>
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-black text-slate-900">${m.author}</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${m.channel} • Risk ${m.crisis_score}%</p>
+                </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-900 transition-all"></i>
+        </div>
+    `).join("") : '<p class="text-[10px] text-slate-400 italic p-8 text-center font-bold uppercase tracking-widest">No high-risk vectors detected.</p>';
+    lucide.createIcons();
 }
 
-function openMentionDrawer(mention) {
-  const { mentionDrawerOverlay, mentionDrawer } = els;
-  if (!mentionDrawerOverlay || !mentionDrawer) return;
-  mentionDrawerOverlay.classList.remove("hidden");
-  mentionDrawer.classList.remove("translate-x-full");
-
-  if (els.mentionDrawerTitle) {
-    els.mentionDrawerTitle.textContent = mention?.sentimentLabel
-      ? `${mention.sentimentLabel.toUpperCase()} mention`
-      : "Mention details";
-  }
-  if (els.mentionDrawerChannel) els.mentionDrawerChannel.textContent = mention.channel || "source";
-  if (els.mentionDrawerTime) els.mentionDrawerTime.textContent = formatRelativeTime(mention.timestamp);
-  if (els.mentionDrawerBrand) els.mentionDrawerBrand.textContent = mention.brand || "Unattributed";
-  if (els.mentionDrawerText) els.mentionDrawerText.textContent = mention.text || "";
-  if (els.mentionDrawerSentiment) {
-    els.mentionDrawerSentiment.textContent = `${sentimentLabelFromScore(mention.sentimentScore)} • ${mention.sentimentScore.toFixed(2)}`;
-  }
-  if (els.mentionDrawerReach) els.mentionDrawerReach.textContent = (mention.reach ?? 0).toLocaleString();
-  if (els.mentionDrawerUrl) {
-    if (mention.url) {
-      els.mentionDrawerUrl.href = mention.url;
-      els.mentionDrawerUrl.classList.remove("hidden");
-    } else {
-      els.mentionDrawerUrl.classList.add("hidden");
+async function refreshCompetitors() {
+    try {
+        const url = state.selectedBrand ? `/api/analytics/competitors?brand=${encodeURIComponent(state.selectedBrand)}` : "/api/analytics/competitors";
+        const res = await fetch(url);
+        const data = await res.json();
+        renderCompetitors(data);
+    } catch (err) {
+        console.error("Failed to load competitors", err);
     }
-  }
 }
 
-const STORAGE_KEY = "brandSentiment.filters.v1";
-function persistFiltersToStorage() {
-  try {
-    const payload = {
-      selectedBrand: state.selectedBrand,
-      isCompareMode: state.isCompareMode,
-      compareBrand: state.compareBrand,
-      dateRange: state.dateRange,
-      searchQuery: state.searchQuery,
-      highImpactOnly: state.highImpactOnly,
-      sort: state.sort,
-      channels: state.channels,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  } catch {
-    // ignore
-  }
-}
-
-function restoreFiltersFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object") {
-      if (parsed.dateRange) state.dateRange = parsed.dateRange;
-      if (typeof parsed.searchQuery === "string") state.searchQuery = parsed.searchQuery;
-      if (typeof parsed.highImpactOnly === "boolean") state.highImpactOnly = parsed.highImpactOnly;
-      if (typeof parsed.sort === "string") state.sort = parsed.sort;
-      if (typeof parsed.selectedBrand === "string") state.selectedBrand = parsed.selectedBrand;
-      if (typeof parsed.isCompareMode === "boolean") state.isCompareMode = parsed.isCompareMode;
-      if (typeof parsed.compareBrand === "string") state.compareBrand = parsed.compareBrand;
-      if (Array.isArray(parsed.channels)) state.channels = sanitizePlatforms(parsed.channels);
+async function refreshTrends() {
+    try {
+        const url = state.selectedBrand ? `/api/analytics/trending?brand=${encodeURIComponent(state.selectedBrand)}` : "/api/analytics/trending";
+        const res = await fetch(url);
+        const data = await res.json();
+        renderTrends(data.trending || []);
+    } catch (err) {
+        console.error("Failed to load trends", err);
     }
-    // If no stored channels, prefer the landing page selection.
-    if (!state.channels || !state.channels.length) {
-      const landing = loadLandingPlatforms();
-      if (landing) state.channels = landing;
-    }
-    hydrateUiControls();
-  } catch {
-    // ignore
-  }
 }
 
-function exportSnapshot() {
-  const snapshot = buildSnapshot();
-  const mentions = getMentionsView().pageItems;
-  const enriched = {
-    ...snapshot,
-    exportedAt: new Date().toISOString(),
-    sort: state.sort,
-    searchQuery: state.searchQuery,
-    highImpactOnly: state.highImpactOnly,
-    page: state.page,
-    pageSize: state.pageSize,
-    visibleMentions: mentions,
-  };
-  const pretty = JSON.stringify(enriched, null, 2);
-  const blob = new Blob([pretty], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `brand-sentiment-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+function setupListeners() {
+    els.brandSelect?.addEventListener("change", async (e) => {
+        state.selectedBrand = e.target.value;
+        await refreshMentions();
+        await refreshCrisis();
+        await refreshCompetitors();
+        await refreshTrends();
+        render();
+    });
 
-  // CSV export as well
-  const csv = mentionsToCsv(mentions);
-  const csvBlob = new Blob([csv], { type: "text/csv" });
-  const csvUrl = URL.createObjectURL(csvBlob);
-  const b = document.createElement("a");
-  b.href = csvUrl;
-  b.download = `brand-sentiment-${Date.now()}.csv`;
-  b.click();
-  URL.revokeObjectURL(csvUrl);
+    els.dateRangeToggle?.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            state.dateRange = btn.getAttribute("data-range");
+            els.dateRangeToggle.querySelectorAll("button").forEach(b => {
+                b.classList.remove("bg-indigo-600", "text-white");
+                b.classList.add("text-slate-400");
+            });
+            btn.classList.remove("text-slate-400");
+            btn.classList.add("bg-indigo-600", "text-white");
+            render();
+        });
+    });
 
-  showToast("Snapshot exported (JSON + CSV)", "success");
+    els.addBrandBtn?.addEventListener("click", () => {
+        els.onboardModal.classList.remove("hidden");
+        els.onboardInput.focus();
+    });
+
+    document.getElementById("brand-onboard-close")?.addEventListener("click", () => els.onboardModal.classList.add("hidden"));
+    document.getElementById("brand-onboard-close-overlay")?.addEventListener("click", () => els.onboardModal.classList.add("hidden"));
+
+    els.onboardSearchBtn?.addEventListener("click", handleBrandSearch);
+    els.onboardInput?.addEventListener("keypress", (e) => e.key === "Enter" && handleBrandSearch());
+    els.onboardConfirmBtn?.addEventListener("click", executeOnboardingSync);
+
+    els.aiAnalyzeBtn?.addEventListener("click", openBrainModal);
+    els.liveSyncBtn?.addEventListener("click", executeLiveSync);
+
+    els.mentionsSearch?.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value.toLowerCase();
+        state.page = 1;
+        render();
+    });
+
+    els.mentionsSort?.addEventListener("change", (e) => {
+        state.sort = e.target.value;
+        render();
+    });
+
+    els.mentionsPrev?.addEventListener("click", () => {
+        if (state.page > 1) {
+            state.page--;
+            render();
+        }
+    });
+
+    els.mentionsNext?.addEventListener("click", () => {
+        const filtered = getFilteredMentions();
+        if (state.page < Math.ceil(filtered.length / state.pageSize)) {
+            state.page++;
+            render();
+        }
+    });
+
+    els.chartTypeToggle?.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            state.chartType = btn.getAttribute("data-chart");
+            els.chartTypeToggle.querySelectorAll("button").forEach(b => {
+                b.classList.remove("bg-white/10", "text-white");
+                b.classList.add("text-slate-400");
+            });
+            btn.classList.remove("text-slate-400");
+            btn.classList.add("bg-white/10", "text-white");
+            render();
+        });
+    });
+
+    // Navigation logic
+    const navItems = ["overview", "mentions", "crisis", "competitors", "trends"];
+    navItems.forEach(item => {
+        const el = document.getElementById(`nav-${item}`);
+        if (el) {
+            el.addEventListener("click", () => {
+                state.activeSection = item;
+                navItems.forEach(i => document.getElementById(`nav-${i}`)?.classList.remove("active"));
+                el.classList.add("active");
+                
+                // Hide all sections
+                document.getElementById("kpi-cards")?.classList.toggle("hidden", item !== "overview");
+                document.getElementById("overview-charts-1")?.classList.toggle("hidden", item !== "overview");
+                document.getElementById("overview-charts-2")?.classList.toggle("hidden", item !== "overview");
+                
+                document.getElementById("section-mentions")?.classList.toggle("hidden", item !== "mentions");
+                document.getElementById("section-crisis")?.classList.toggle("hidden", item !== "crisis");
+                document.getElementById("section-competitors")?.classList.toggle("hidden", item !== "competitors");
+                document.getElementById("section-trends")?.classList.toggle("hidden", item !== "trends");
+                
+                // Update titles
+                const titles = {
+                    overview: ["Brand Intelligence Overview", "Real-time NLP Analysis Engine"],
+                    mentions: ["Mentions Feed", "Detailed data stream from 8 channels"],
+                    crisis: ["Crisis Radar", "Active reputation risk monitoring"],
+                    competitors: ["Competitor Intelligence", "Market share and sentiment benchmarks"],
+                    trends: ["Trending Topics", "NLP-extracted conversation themes"]
+                };
+                if (els.pageTitle) els.pageTitle.textContent = titles[item][0];
+                if (els.pageSub) els.pageSub.textContent = titles[item][1];
+                
+                render();
+            });
+        }
+    });
+
+    els.settingsBtn?.addEventListener("click", () => els.settingsModal.classList.toggle("hidden"));
+    document.getElementById("settings-close-overlay")?.addEventListener("click", () => els.settingsModal.classList.add("hidden"));
+
+    // Modal/Drawer Closers
+    document.getElementById("brain-close")?.addEventListener("click", () => document.getElementById("brain-modal").classList.add("hidden"));
+    document.getElementById("drawer-close")?.addEventListener("click", () => {
+        document.getElementById("mention-drawer").classList.add("translate-x-full");
+        document.getElementById("drawer-overlay").classList.add("hidden");
+    });
+    document.getElementById("drawer-overlay")?.addEventListener("click", () => {
+        document.getElementById("mention-drawer").classList.add("translate-x-full");
+        document.getElementById("drawer-overlay").classList.add("hidden");
+    });
 }
 
-function csvEscape(value) {
-  const s = String(value ?? "");
-  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
-
-function mentionsToCsv(mentions) {
-  const header = [
-    "id",
-    "brand",
-    "channel",
-    "text",
-    "sentimentScore",
-    "sentimentLabel",
-    "timestamp",
-    "reach",
-  ];
-  const rows = mentions.map((m) => [
-    m.id,
-    m.brand,
-    m.channel,
-    m.text,
-    m.sentimentScore,
-    m.sentimentLabel,
-    m.timestamp,
-    m.reach,
-  ]);
-  return [header, ...rows].map((r) => r.map(csvEscape).join(",")).join("\n");
-}
-
-function hydrateMobileMenu() {
-  const { sidebar, sidebarOverlay, openSidebarBtn, closeSidebarBtn } = els;
-  if (!sidebar || !sidebarOverlay || !openSidebarBtn || !closeSidebarBtn) return;
-
-  function open() {
-    sidebar.classList.remove("-translate-x-full");
-    sidebarOverlay.classList.remove("hidden", "opacity-0");
-  }
-
-  function close() {
-    sidebar.classList.add("-translate-x-full");
-    sidebarOverlay.classList.add("opacity-0");
+function showToast(message, type = 'info') {
+    if (!els.toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl text-xs font-bold transition-all duration-300 slide-in ${
+        type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 
+        (type === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-slate-800 border-white/10 text-white')
+    }`;
+    toast.textContent = message;
+    els.toastContainer.appendChild(toast);
     setTimeout(() => {
-      sidebarOverlay.classList.add("hidden");
-    }, 300);
-  }
-
-  openSidebarBtn.addEventListener("click", open);
-  closeSidebarBtn.addEventListener("click", close);
-  sidebarOverlay.addEventListener("click", close);
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
-function showToast(message, type = "info") {
-  if (!els.toastContainer) return;
-
-  const toast = document.createElement("div");
-  const colors =
-    type === "success"
-      ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-700 dark:text-indigo-300"
-      : "bg-zinc-800 dark:bg-zinc-900 border-zinc-700 dark:border-zinc-700 text-zinc-200 dark:text-zinc-200";
-
-  toast.className = `
-    flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl transform translate-y-10 opacity-0 transition-all duration-300 ${colors}
-  `;
-  toast.innerHTML = `
-    <i class="ph ${type === "success" ? "ph-check-circle" : "ph-info"
-    } text-lg"></i>
-    <span class="text-xs font-medium">${message}</span>
-  `;
-
-  els.toastContainer.appendChild(toast);
-
-  // Animate in
-  requestAnimationFrame(() => {
-    toast.classList.remove("translate-y-10", "opacity-0");
-  });
-
-  // Remove after delay
-  setTimeout(() => {
-    toast.classList.add("translate-y-10", "opacity-0");
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
-  }, 3000);
+async function handleLogout() {
+    try {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/login";
+    } catch (err) {
+        showToast("Logout failed", "error");
+    }
 }
 
-function buildSnapshot() {
-  const filtered = filterByBrandAndRange(
-    state.rawMentions,
-    state.selectedBrand,
-    state.dateRange,
-    state.channels
-  );
-  const stats = computeStats(filtered);
-  return {
-    brand: state.selectedBrand,
-    dateRange: state.dateRange,
-    channels: state.channels,
-    totals: {
-      mentions: stats.total,
-      positive: stats.positive,
-      neutral: stats.neutral,
-      negative: stats.negative,
-      avgScore: stats.avgScore,
-    },
-  };
+window.handleLogout = handleLogout;
+
+function handleSwitchAccount() {
+    handleLogout(); // For now, switching accounts just logs you out to the login screen
+}
+
+window.handleSwitchAccount = handleSwitchAccount;
+
+async function handleBrandSearch() {
+    const query = els.onboardInput.value.trim();
+    if (!query) return;
+
+    els.onboardSearching.classList.remove("hidden");
+    els.onboardResult.classList.add("hidden");
+    els.onboardError.classList.add("hidden");
+
+    try {
+        const res = await fetch(`/api/brands/search?q=${encodeURIComponent(query)}`);
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || "Search failed");
+        }
+        const data = await res.json();
+        
+        els.onboardSearching.classList.add("hidden");
+        
+        if (data.exists) {
+            els.onboardLogo.src = data.logo || `https://ui-avatars.com/api/?name=${query}&background=4f46e5&color=fff`;
+            els.onboardBrandName.textContent = data.brand;
+            els.onboardResult.classList.remove("hidden");
+        } else {
+            document.getElementById("error-query").textContent = query;
+            els.onboardRecs.innerHTML = data.recommendations.map(r => `
+                <button onclick="document.getElementById('onboard-brand-input').value='${r}'; document.getElementById('onboard-search-btn').click()" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all">${r}</button>
+            `).join("");
+            els.onboardError.classList.remove("hidden");
+        }
+    } catch (err) {
+        showToast(err.message || "Search failed", "error");
+        els.onboardSearching.classList.add("hidden");
+    }
+}
+
+async function executeOnboardingSync() {
+    const brand = els.onboardBrandName.textContent;
+    document.getElementById("onboard-step-1").classList.add("hidden");
+    document.getElementById("onboard-step-2").classList.remove("hidden");
+
+    const steps = [
+        { per: 20, status: "Connecting to Global Social Graph..." },
+        { per: 45, status: "Scraping YouTube & Reddit streams..." },
+        { per: 70, status: "Running NLP Sentiment Extraction..." },
+        { per: 90, status: "Categorizing Crisis Risk levels..." },
+        { per: 100, status: "Intelligence Sync Complete!" }
+    ];
+
+    for (const step of steps) {
+        await new Promise(r => setTimeout(r, 800 + Math.random() * 1000));
+        document.getElementById("sync-bar").style.width = `${step.per}%`;
+        document.getElementById("sync-per").textContent = `${step.per}%`;
+        document.getElementById("sync-status").textContent = step.status;
+    }
+
+    try {
+        const res = await fetch('/api/brands', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ brand_name: brand })
+        });
+        
+        if (res.ok) {
+            showToast(`Tracking ${brand} successfully!`, 'success');
+            state.selectedBrand = brand;
+            els.brandSelect.value = brand;
+            
+            // Re-fetch all data for the new brand
+            await refreshBrands();
+            await refreshMentions();
+            await refreshCrisis();
+            await refreshCompetitors();
+            await refreshTrends();
+            
+            setTimeout(() => {
+                els.onboardModal.classList.add("hidden");
+                // Reset for next time
+                document.getElementById("onboard-step-1").classList.remove("hidden");
+                document.getElementById("onboard-step-2").classList.add("hidden");
+                els.onboardInput.value = "";
+                render();
+            }, 1000);
+        }
+    } catch (err) {
+        showToast("Final sync failed", "error");
+    }
+}
+
+async function openBrainModal() {
+    const modal = document.getElementById("brain-modal");
+    const content = document.getElementById("brain-content");
+    
+    modal.classList.remove("hidden");
+    content.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-6"></div>
+            <h3 class="text-xl font-black text-slate-900 mb-2">Engaging Neural Core...</h3>
+            <p class="text-slate-400 text-[10px] uppercase tracking-widest font-black">Synthesizing platform intelligence for ${state.selectedBrand || 'Global Market'}</p>
+        </div>
+    `;
+
+    try {
+        const res = await fetch("/api/ai/insights", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ brand: state.selectedBrand })
+        });
+        const data = await res.json();
+        
+        // Add a slight delay for "wow" effect of the animation
+        await new Promise(r => setTimeout(r, 1200));
+        
+        content.innerHTML = `
+            <div class="prose max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-strong:text-slate-900 prose-hr:border-slate-100">
+                ${marked.parse(data.insight)}
+            </div>
+            <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <i data-lucide="check-circle" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Intelligence Confidence</p>
+                        <p class="text-xl font-black text-slate-900">${data.healthScore}% Precision</p>
+                    </div>
+                </div>
+                <button onclick="window.print()" class="px-8 py-4 bg-slate-900 text-white rounded-2xl text-xs font-black hover:bg-slate-800 transition-all flex items-center gap-2 shadow-xl shadow-slate-200">
+                    <i data-lucide="download" class="w-4 h-4"></i> EXPORT REPORT
+                </button>
+            </div>
+        `;
+        lucide.createIcons();
+    } catch (err) {
+        content.innerHTML = `<div class="p-20 text-center"><p class="text-rose-500 font-black mb-2 uppercase tracking-widest">Neural Link Severed</p><p class="text-slate-400 text-[10px] font-bold">FAILED TO SYNTHESIZE AI INSIGHTS. CHECK NETWORK STATUS.</p></div>`;
+    }
+}
+
+async function executeLiveSync() {
+    if (!state.selectedBrand) return;
+    const btn = els.liveSyncBtn;
+    const icon = btn.querySelector("i");
+    icon.classList.add("animate-spin");
+    
+    try {
+        const platforms = ["youtube", "twitter", "reddit", "instagram", "tiktok"];
+        const p = platforms[Math.floor(Math.random() * platforms.length)];
+        const res = await fetch(`/api/fetch-live?brand=${encodeURIComponent(state.selectedBrand)}&platform=${p}`);
+        const data = await res.json();
+        if (data.mention) {
+            state.rawMentions.unshift(data.mention);
+            processMentionsByThreshold();
+            showToast(`Interrupted live mention on ${p}!`, "success");
+            render();
+        }
+    } catch (err) {
+        showToast("Sync failed", "error");
+    } finally {
+        icon.classList.remove("animate-spin");
+    }
+}
+
+function getFilteredMentions() {
+    return state.rawMentions.filter(m => {
+        const matchesBrand = !state.selectedBrand || state.selectedBrand === "All Brands" || m.brand === state.selectedBrand;
+        const matchesSearch = !state.searchQuery || (m.text && m.text.toLowerCase().includes(state.searchQuery));
+        return matchesBrand && matchesSearch;
+    });
 }
 
 function render() {
-  if (state.status === "loading") {
-    renderLoadingState();
-    return;
-  }
+    const filtered = getFilteredMentions();
 
-  if (state.status === "error") {
-    renderErrorState(state.errorMessage || "Something went wrong.");
-    return;
-  }
-
-  let filtered = filterByBrandAndRange(
-    state.rawMentions,
-    state.selectedBrand,
-    state.dateRange,
-    state.channels
-  );
-  filtered = applyAdditionalMentionFilters(filtered);
-  const stats = computeStats(filtered);
-  const view = getMentionsView(filtered);
-
-  renderBrandPulse(stats);
-  renderKpiCards(stats);
-  renderTrendChart(stats);
-  renderMentionsList(view);
-  renderDistribution(stats);
-  renderChannelBreakdown(filtered, stats.total);
-  renderPlatformFilters();
-}
-
-function renderPlatformFilters() {
-  if (!els.platformFilterBtns) return;
-  els.platformFilterBtns.querySelectorAll("[data-platform]").forEach((btn) => {
-    const platform = btn.getAttribute("data-platform");
-    if (state.channels.includes(platform)) {
-      btn.classList.add(
-        "bg-indigo-50",
-        "dark:bg-indigo-900/40",
-        "border-indigo-300",
-        "dark:border-indigo-700"
-      );
-      btn.classList.remove(
-        "opacity-50",
-        "bg-zinc-100",
-        "dark:bg-zinc-900",
-        "border-zinc-200",
-        "dark:border-zinc-800"
-      );
-    } else {
-      btn.classList.remove(
-        "bg-indigo-50",
-        "dark:bg-indigo-900/40",
-        "border-indigo-300",
-        "dark:border-indigo-700"
-      );
-      btn.classList.add(
-        "opacity-50",
-        "bg-zinc-100",
-        "dark:bg-zinc-900",
-        "border-zinc-200",
-        "dark:border-zinc-800"
-      );
+    if (state.activeSection === "overview") {
+        renderKpis(filtered);
+        renderCharts(filtered);
+        renderEmotions();
+        renderPlatformPulse(filtered);
+    } else if (state.activeSection === "mentions") {
+        renderMentionsList(filtered);
     }
-  });
 }
 
-function renderLoadingState() {
-  if (els.kpiCards) {
+function renderKpis(mentions) {
+    if (!els.kpiCards) return;
+    const total = mentions.length;
+    const reach = mentions.reduce((acc, m) => acc + (m.reach || 0), 0);
+
     els.kpiCards.innerHTML = `
-      ${Array.from({ length: 4 })
-        .map(
-          () => `
-        <div data-card class="relative overflow-hidden rounded-xl border border-zinc-200/50 dark:border-white/5 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
-          <div class="h-3 w-24 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-          <div class="mt-3 h-7 w-16 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-          <div class="mt-2 h-3 w-40 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-        </div>
-      `
-        )
-        .join("")}
-    `;
-  }
-
-  // Mentions skeleton list
-  if (els.mentionsList) {
-    els.mentionsList.innerHTML = `
-      ${Array.from({ length: 6 })
-        .map(
-          () => `
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 px-3.5 py-3.5 shadow-sm dark:shadow-zinc-950/50">
-          <div class="flex items-center justify-between">
-            <div class="h-3 w-28 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-            <div class="h-3 w-16 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+        <div class="kpi-card bg-white border border-slate-100 shadow-sm flex items-center gap-6">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <i data-lucide="bar-chart-2" class="w-7 h-7"></i>
           </div>
-          <div class="mt-3 h-3 w-full bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
-          <div class="mt-2 h-3 w-4/5 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Volume</p>
+            <h2 class="text-2xl font-black text-slate-900">${total.toLocaleString()}</h2>
+          </div>
         </div>
-      `
-        )
-        .join("")}
+        <div class="kpi-card bg-white border border-slate-100 shadow-sm flex items-center gap-6">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-50 flex items-center justify-center text-cyan-600">
+            <i data-lucide="users" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Reach</p>
+            <h2 class="text-2xl font-black text-slate-900">${(reach/1000000).toFixed(1)}M</h2>
+          </div>
+        </div>
+        <div class="kpi-card bg-indigo-600 text-white flex items-center gap-6 shadow-xl shadow-indigo-100">
+          <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+            <i data-lucide="trending-up" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Momentum</p>
+            <h2 class="text-2xl font-black text-white">+12.5%</h2>
+          </div>
+        </div>
     `;
-  }
-
-  if (els.mentionsCountPill) els.mentionsCountPill.textContent = "Loading…";
-  if (els.mentionsPaginationLabel) els.mentionsPaginationLabel.textContent = "Loading…";
-  if (els.sentimentDistribution) {
-    els.sentimentDistribution.innerHTML =
-      '<div class="h-4 w-40 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>';
-  }
-  if (els.channelBreakdown) {
-    els.channelBreakdown.innerHTML =
-      '<div class="h-4 w-40 bg-zinc-200/70 dark:bg-zinc-800 rounded animate-pulse"></div>';
-  }
+    lucide.createIcons();
+    
+    // Fetch real health score if possible
+    fetchHealthScore();
 }
 
-function renderErrorState(message) {
-  if (els.kpiCards) els.kpiCards.innerHTML = "";
-  if (els.mentionsCountPill) els.mentionsCountPill.textContent = "—";
-  if (els.mentionsList) {
-    els.mentionsList.innerHTML = `
-      <div class="rounded-xl border border-rose-500/20 bg-rose-50/80 dark:bg-rose-500/10 px-4 py-4 text-xs text-rose-800 dark:text-rose-200">
-        ${message}
-        <button id="retry-load" class="ml-2 underline underline-offset-2">Retry</button>
-      </div>
-    `;
-    const retry = document.getElementById("retry-load");
-    if (retry) retry.addEventListener("click", refreshMentions);
-  }
-  if (els.mentionsPaginationLabel) els.mentionsPaginationLabel.textContent = "";
+async function fetchHealthScore() {
+    try {
+        const brand = state.selectedBrand === "All Brands" ? "" : state.selectedBrand;
+        const res = await fetch("/api/ai/insights", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ brand })
+        });
+        const data = await res.json();
+        const el = document.getElementById("health-score-val");
+        if (el) el.textContent = data.healthScore || "--";
+    } catch(e) {}
 }
 
-function getMentionsView(mentions) {
-  const sorted = mentions.slice();
-  if (state.sort === "reach") {
-    sorted.sort((a, b) => (b.reach ?? 0) - (a.reach ?? 0));
-  } else if (state.sort === "most_positive") {
-    sorted.sort((a, b) => (b.sentimentScore ?? 0) - (a.sentimentScore ?? 0));
-  } else if (state.sort === "most_negative") {
-    sorted.sort((a, b) => (a.sentimentScore ?? 0) - (b.sentimentScore ?? 0));
-  } else {
-    sorted.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
-  }
+function renderMentionsList(mentions) {
+    if (!els.mentionsList) return;
+    
+    let sorted = [...mentions];
+    if (state.sort === "impact") sorted.sort((a,b) => b.reach - a.reach);
+    else if (state.sort === "crisis") sorted.sort((a,b) => (b.crisis_score || 0) - (a.crisis_score || 0));
+    else sorted.sort((a,b) => new Date(b.published_at) - new Date(a.published_at));
 
-  const total = sorted.length;
-  const pageSize = state.pageSize;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const page = Math.min(Math.max(1, state.page), totalPages);
-  state.page = page;
+    const start = (state.page - 1) * state.pageSize;
+    const paged = sorted.slice(start, start + state.pageSize);
 
-  const startIdx = (page - 1) * pageSize;
-  const endIdx = Math.min(startIdx + pageSize, total);
-  const pageItems = sorted.slice(startIdx, endIdx);
+    if (els.mentionsPaginationLabel) els.mentionsPaginationLabel.textContent = `Page ${state.page} of ${Math.ceil(sorted.length/state.pageSize) || 1}`;
 
-  return { total, page, pageSize, totalPages, startIdx, endIdx, pageItems };
-}
-
-function applyAdditionalMentionFilters(mentions) {
-  return mentions.filter((m) => {
-    if (state.highImpactOnly && m.reach < 10000) {
-      return false;
-    }
-    if (state.searchQuery) {
-      const q = state.searchQuery;
-      const text = (m.text || "").toLowerCase();
-      const channel = (m.channel || "").toLowerCase();
-      if (!text.includes(q) && !channel.includes(q)) {
-        return false;
-      }
-    }
-    return true;
-  });
-}
-
-function renderBrandPulse(stats) {
-  if (!els.brandPulse) return;
-  const score = stats.avgScore || 0;
-  const label = sentimentLabelFromScore(score);
-  const color = sentimentColor(score);
-
-  const dot = els.brandPulse.querySelector("span");
-  const textNode = els.brandPulse.querySelectorAll("span")[1];
-
-  if (dot) {
-    dot.className =
-      "inline-block h-1.5 w-1.5 rounded-full animate-pulse bg-" +
-      (color === "indigo"
-        ? "indigo-500"
-        : color === "rose"
-          ? "rose-500"
-          : "zinc-400");
-  }
-  if (textNode) {
-    textNode.textContent = `${label} • ${score.toFixed(2)}`;
-  }
-}
-
-function renderKpiCards(stats) {
-  if (!els.kpiCards) return;
-  const { total, positive, neutral, negative, avgScore, reachPerMention } =
-    stats;
-
-  const sentimentScoreText = avgScore > 0 ? "text-indigo-600 dark:text-indigo-400" : avgScore < 0 ? "text-rose-600 dark:text-rose-400" : "text-zinc-600 dark:text-zinc-400";
-
-  const competitorStats = state.isCompareMode && state.compareBrand
-    ? computeStats(filterByBrandAndRange(state.rawMentions, state.compareBrand, state.dateRange, state.channels))
-    : null;
-  const benchmarkScore = competitorStats ? competitorStats.avgScore.toFixed(2) : "0.12";
-
-  // AI Insights Logic
-  const insightsPanel = document.getElementById("ai-insights-panel");
-  const insightsList = document.getElementById("ai-insights-list");
-  if (insightsPanel && insightsList) {
-    if (total > 0) {
-      insightsPanel.classList.remove("hidden");
-      const sentimentTrend = avgScore > 0.3 ? "dominantly positive" : avgScore < -0.3 ? "critically negative" : "largely neutral";
-      const topPlatform = stats.byPlatform && stats.byPlatform.size > 0 ? Array.from(stats.byPlatform.keys())[0] : "All Platforms";
-      insightsList.innerHTML = `
-        <li>Overall sentiment for <b>${state.selectedBrand}</b> is <b>${sentimentTrend}</b>.</li>
-        <li>The primary driver of discussion is concentrated on <b>${topPlatform}</b>.</li>
-        ${total > 5 ? `<li>AI recommends <b>${avgScore < 0 ? 'Urgent Engagement' : 'Amplification'}</b> based on current volume of ${total} mentions.</li>` : ''}
-        ${competitorStats ? `<li>Comparing against <b>${state.compareBrand}</b>: they currently stand at a sentiment score of ${benchmarkScore}. <b>${avgScore >= competitorStats.avgScore ? 'You are leading.' : 'They are leading.'}</b></li>` : ''}
-      `;
-    } else {
-      insightsPanel.classList.add("hidden");
-    }
-  }
-
-  els.kpiCards.innerHTML = `
-    <div data-card class="relative overflow-hidden rounded-xl border border-zinc-200/50 dark:border-white/5 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
-      <div class="absolute -right-4 -top-4 w-16 h-16 bg-zinc-300/20 dark:bg-zinc-800/30 rounded-full blur-2xl"></div>
-      <p class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.18em]">Total mentions</p>
-      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">${total}</p>
-      <p class="text-[11px] text-zinc-500 dark:text-zinc-500">Across all sources & range</p>
-    </div>
-    <div data-card class="relative overflow-hidden rounded-xl border border-indigo-500/20 dark:border-indigo-400/10 bg-indigo-50/50 dark:bg-indigo-900/10 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
-      <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-500/20 dark:bg-indigo-500/10 rounded-full blur-2xl"></div>
-      <div class="flex items-center justify-between">
-        <p class="text-[10px] font-medium text-indigo-700 dark:text-indigo-400 uppercase tracking-[0.18em]">Sentiment score</p>
-        ${state.isCompareMode && state.compareBrand ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400">VS ${state.compareBrand}</span>` : ''}
-      </div>
-      <p class="text-2xl font-bold ${sentimentScoreText}">${avgScore.toFixed(2)}</p>
-      <p class="text-[11px] text-indigo-600/90 dark:text-indigo-400/80">
-        ${state.isCompareMode && state.compareBrand ? `Benchmark: <span class="font-bold">${benchmarkScore}</span> avg` : 'Higher is more positive'}
-      </p>
-    </div>
-    <div data-card class="relative overflow-hidden rounded-xl border border-purple-500/20 dark:border-purple-400/10 bg-purple-50/50 dark:bg-purple-900/10 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
-      <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/20 dark:bg-purple-500/10 rounded-full blur-2xl"></div>
-      <p class="text-[10px] font-medium text-purple-700 dark:text-purple-400 uppercase tracking-[0.18em]">Sentiment split</p>
-      <div class="flex items-baseline gap-3 text-xs">
-        <span class="text-indigo-600 dark:text-indigo-400">${roundedPercent(positive, total)}% <span class="text-zinc-500 dark:text-zinc-500">pos</span></span>
-        <span class="text-zinc-600 dark:text-zinc-400">${roundedPercent(neutral, total)}% <span class="text-zinc-500 dark:text-zinc-500">neutral</span></span>
-        <span class="text-rose-600 dark:text-rose-400">${roundedPercent(negative, total)}% <span class="text-zinc-500 dark:text-zinc-500">neg</span></span>
-      </div>
-      <div class="mt-1.5 h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800/60 overflow-hidden flex border border-zinc-300/30 dark:border-zinc-700/50 shadow-inner">
-        <div style="width:${roundedPercent(positive, total)}%;" class="bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-l-full shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
-        <div style="width:${roundedPercent(neutral, total)}%;" class="bg-zinc-300 dark:bg-zinc-700"></div>
-        <div style="width:${roundedPercent(negative, total)}%;" class="bg-gradient-to-r from-rose-400 to-rose-500 rounded-r-full shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
-      </div>
-    </div>
-    <div data-card class="relative overflow-hidden rounded-xl border border-zinc-200/50 dark:border-white/5 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl px-4 py-3.5 flex flex-col gap-1.5 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all">
-      <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full blur-2xl"></div>
-      <p class="text-[10px] font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-[0.18em]">Avg reach</p>
-      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">${Math.round(reachPerMention).toLocaleString()}</p>
-      <p class="text-[11px] text-zinc-500 dark:text-zinc-500">Avg. impact per mention</p>
-    </div>
-  `;
-}
-
-function renderTrendChart(stats) {
-  if (!els.trendChartCanvas) return;
-
-  const entries = Array.from(stats.byBucket.entries()).sort(
-    (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
-  );
-
-  const labels = entries.map(([k]) => formatBucketLabel(k));
-  const posData = entries.map(([, v]) => v.positive);
-  const negData = entries.map(([, v]) => v.negative);
-
-  if (state.chartInstance) {
-    // If chart type changed, rebuild
-    if (state.chartInstance.config.type !== state.chartType) {
-      state.chartInstance.destroy();
-      state.chartInstance = null;
-      return renderTrendChart(stats);
-    }
-    state.chartInstance.data.labels = labels;
-    state.chartInstance.data.datasets[0].data = posData;
-    state.chartInstance.data.datasets[1].data = negData;
-    state.chartInstance.update();
-  } else {
-    // Check if Chart is loaded
-    if (typeof Chart === "undefined") return;
-
-    const isDark = themeState.current === "dark";
-    const gridColor = isDark ? "#27272a" : "#e5e7eb";
-    const tickColor = isDark ? "#71717a" : "#78716c";
-    const tooltipBg = isDark ? "#18181b" : "#ffffff";
-    const tooltipTitle = isDark ? "#a1a1aa" : "#57534e";
-    const tooltipBody = isDark ? "#fafafa" : "#1c1917";
-    const tooltipBorder = isDark ? "#27272a" : "#e5e7eb";
-
-    state.chartInstance = new Chart(els.trendChartCanvas, {
-      type: state.chartType,
-      data: {
-        labels,
-        datasets: [
-          {
-            label: "Positive",
-            data: posData,
-            backgroundColor: "#6366f1", // indigo-500
-            borderColor: "#6366f1",
-            tension: 0.35,
-            borderRadius: 4,
-            barThickness: 12,
-            pointRadius: state.chartType === "line" ? 2 : 0,
-            pointHoverRadius: state.chartType === "line" ? 4 : 0,
-            fill: false,
-          },
-          {
-            label: "Negative",
-            data: negData,
-            backgroundColor: "#f43f5e", // rose-500
-            borderColor: "#f43f5e",
-            tension: 0.35,
-            borderRadius: 4,
-            barThickness: 12,
-            pointRadius: state.chartType === "line" ? 2 : 0,
-            pointHoverRadius: state.chartType === "line" ? 4 : 0,
-            fill: false,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            mode: "index",
-            intersect: false,
-            backgroundColor: tooltipBg,
-            titleColor: tooltipTitle,
-            bodyColor: tooltipBody,
-            borderColor: tooltipBorder,
-            borderWidth: 1,
-            padding: 10,
-            displayColors: true,
-            boxPadding: 4,
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: tickColor, font: { size: 10 } },
-          },
-          y: {
-            grid: { color: gridColor },
-            ticks: { color: tickColor, font: { size: 10 } },
-            beginAtZero: true,
-          },
-        },
-        interaction: {
-          mode: "nearest",
-          axis: "x",
-          intersect: false,
-        },
-      },
-    });
-  }
-}
-
-function renderMentionsList(view) {
-  if (!els.mentionsList || !els.mentionsCountPill) return;
-  const { total, page, totalPages, startIdx, endIdx, pageItems } = view;
-  els.mentionsCountPill.textContent =
-    total === 1 ? "1 mention" : `${total} mentions`;
-
-  if (els.mentionsPaginationLabel) {
-    els.mentionsPaginationLabel.textContent =
-      total === 0 ? "Showing 0–0" : `Showing ${startIdx + 1}–${endIdx}`;
-  }
-  if (els.mentionsPrev) els.mentionsPrev.disabled = page <= 1;
-  if (els.mentionsNext) els.mentionsNext.disabled = page >= totalPages;
-
-  if (!total) {
-    els.mentionsList.innerHTML =
-      '<div class="text-xs text-zinc-500 dark:text-zinc-500 py-4 text-center">No mentions for this selection yet.</div>';
-    return;
-  }
-
-  const channelStyles = {
-    twitter: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/25",
-    instagram: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/25",
-    youtube: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
-    tiktok: "bg-zinc-950/10 text-zinc-900 dark:text-zinc-100 border-zinc-950/25",
-    reddit: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/25",
-    news: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/25",
-    reviews: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/25",
-    news_rss: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
-  };
-
-  const sourceTypeIcons = {
-    video: "ph ph-video-camera",
-    comment: "ph ph-chats-teardrop",
-    post: "ph ph-article",
-    review: "ph ph-star-half",
-    article: "ph ph-newspaper",
-  };
-
-  els.mentionsList.innerHTML = pageItems
-    .map((m) => {
-      const color = sentimentColor(m.sentimentScore);
-      const borderColor =
-        color === "indigo"
-          ? "border-indigo-500/25"
-          : color === "rose"
-            ? "border-rose-500/25"
-            : "border-zinc-600/70 dark:border-zinc-700/70";
-      const badgeColor =
-        color === "indigo"
-          ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
-          : color === "rose"
-            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-            : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400";
-
-      const channelClass =
-        channelStyles[m.channel] ||
-        "bg-zinc-200/60 dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700";
-
-      const sourceIcon = sourceTypeIcons[m.sourceType] || "ph ph-globe";
-      const author = m.author ? `<span class="font-medium text-zinc-700 dark:text-zinc-300">@${m.author}</span>` : "";
-
-      return `
-        <button type="button" data-mention-id="${m.id}"
-          class="w-full text-left rounded-xl border ${borderColor} bg-white/70 dark:bg-zinc-900/50 backdrop-blur-sm px-3.5 py-3.5 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] flex flex-col gap-2 hover:border-zinc-300 dark:hover:border-zinc-500 transition-all hover:translate-y-[-1px]">
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-              <span class="rounded-md px-2 py-0.5 border ${channelClass} flex items-center gap-1 shadow-sm">
-                <i class="${sourceIcon}"></i>
-                ${m.channel} ${m.sourceType ? `• ${m.sourceType}` : ""}
-              </span>
-              <span class="text-[10px] text-zinc-400 dark:text-zinc-500">
-                ${formatRelativeTime(m.timestamp)}
-              </span>
+    els.mentionsList.innerHTML = paged.map(m => `
+        <div class="p-8 hover:bg-slate-50/80 transition-all cursor-pointer group" onclick='openMentionDrawer(${JSON.stringify(m).replace(/'/g, "&apos;")})'>
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                        <i data-lucide="${getPlatformIcon(m.channel)}" class="w-5 h-5 text-slate-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-slate-900">${m.author || 'Anonymous'}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${m.channel} • ${new Date(m.published_at).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <span class="text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${m.sentimentLabel === 'positive' ? 'badge-pos' : (m.sentimentLabel === 'negative' ? 'badge-neg' : 'badge-neu')}">${m.sentimentLabel}</span>
             </div>
-            <span class="rounded-md px-2 py-0.5 text-[10px] font-medium ${badgeColor}">
-              ${(m.sentimentLabel ?? "").toUpperCase()}
-            </span>
-          </div>
-          <div class="flex flex-col gap-1">
-            ${author}
-            <p class="text-xs text-zinc-900 dark:text-zinc-100 leading-relaxed">
-              ${m.text}
-            </p>
-          </div>
-          <div class="flex items-center justify-between text-[10px] text-zinc-500 dark:text-zinc-500">
-            <span>Reach: ${m.reach.toLocaleString()}</span>
-            <span>AI Score: ${m.sentimentScore.toFixed(2)}</span>
-          </div>
-        </button>
-      `;
-    })
-    .join("");
-
-  // Click delegation for opening drawer
-  els.mentionsList.querySelectorAll("[data-mention-id]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-mention-id");
-      const mention = state.rawMentions.find((m) => String(m.id) === String(id));
-      if (!mention) return;
-      state.selectedMentionId = id;
-      openMentionDrawer(mention);
-    });
-  });
-}
-
-function renderDistribution(stats) {
-  if (!els.sentimentDistribution) return;
-  const { total, positive, neutral, negative } = stats;
-
-  els.sentimentDistribution.innerHTML = `
-    <h4 class="text-[11px] font-semibold text-indigo-800 dark:text-indigo-300 mb-1.5">Sentiment distribution</h4>
-    <p class="text-[11px] text-indigo-700/90 dark:text-indigo-400/80 mb-3">
-      ${total ? "Share of mentions by sentiment." : "No data in this range."}
-    </p>
-    <div class="space-y-2.5">
-      <div class="flex items-center justify-between gap-2 text-[11px]">
-        <span class="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
-          <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-          Positive
-        </span>
-        <span class="text-indigo-600 dark:text-indigo-400 font-medium">${positive} • ${roundedPercent(positive, total)}%</span>
-      </div>
-      <div class="flex items-center justify-between gap-2 text-[11px]">
-        <span class="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
-          <span class="h-2 w-2 rounded-full bg-zinc-400"></span>
-          Neutral
-        </span>
-        <span class="text-zinc-600 dark:text-zinc-400 font-medium">${neutral} • ${roundedPercent(neutral, total)}%</span>
-      </div>
-      <div class="flex items-center justify-between gap-2 text-[11px]">
-        <span class="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
-          <span class="h-2 w-2 rounded-full bg-rose-500"></span>
-          Negative
-        </span>
-        <span class="text-rose-600 dark:text-rose-400 font-medium">${negative} • ${roundedPercent(negative, total)}%</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderChannelBreakdown(mentions, total) {
-  if (!els.channelBreakdown) return;
-  const byChannel = new Map();
-  for (const m of mentions) {
-    if (!byChannel.has(m.channel)) {
-      byChannel.set(m.channel, { count: 0, scoreSum: 0 });
-    }
-    const entry = byChannel.get(m.channel);
-    entry.count++;
-    entry.scoreSum += m.sentimentScore;
-  }
-
-  if (!byChannel.size) {
-    els.channelBreakdown.innerHTML = `
-      <h4 class="text-[11px] font-semibold text-purple-800 dark:text-purple-300 mb-1.5">Channel performance</h4>
-      <p class="text-[11px] text-purple-700/90 dark:text-purple-400/80">No active channels for this selection.</p>
-    `;
-    return;
-  }
-
-  const rows = Array.from(byChannel.entries())
-    .map(([channel, { count, scoreSum }]) => {
-      const avg = count ? scoreSum / count : 0;
-      const label = sentimentLabelFromScore(avg);
-      const color = sentimentColor(avg);
-      const textColor =
-        color === "indigo"
-          ? "text-indigo-600 dark:text-indigo-400"
-          : color === "rose"
-            ? "text-rose-600 dark:text-rose-400"
-            : "text-zinc-600 dark:text-zinc-400";
-      return `
-        <div class="flex items-center justify-between text-[11px] py-1.5">
-          <div class="flex flex-col">
-            <span class="capitalize text-zinc-800 dark:text-zinc-200 font-medium">${channel}</span>
-            <span class="text-[10px] text-zinc-500 dark:text-zinc-500">${count} mentions • ${roundedPercent(count, total || count)}% share</span>
-          </div>
-          <div class="text-right">
-            <p class="${textColor} font-medium">${label}</p>
-            <p class="text-[10px] text-zinc-500 dark:text-zinc-500">${avg.toFixed(2)} score</p>
-          </div>
+            <p class="text-base text-slate-600 leading-relaxed line-clamp-2 mb-4 font-medium">${m.text}</p>
+            <div class="flex items-center gap-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span class="flex items-center gap-2"><i data-lucide="users" class="w-3.5 h-3.5"></i>${(m.reach || 0).toLocaleString()} Reach</span>
+                <span class="flex items-center gap-2"><i data-lucide="heart" class="w-3.5 h-3.5"></i>${m.likes || 0}</span>
+                <span class="flex items-center gap-2"><i data-lucide="share-2" class="w-3.5 h-3.5"></i>${m.shares || 0}</span>
+            </div>
         </div>
-      `;
-    })
-    .join("");
-
-  els.channelBreakdown.innerHTML = `
-    <h4 class="text-[11px] font-semibold text-purple-800 dark:text-purple-300 mb-1.5">Channel performance</h4>
-    <p class="text-[11px] text-purple-700/90 dark:text-purple-400/80 mb-2">Which channels drive the strongest sentiment.</p>
-    <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
-      ${rows}
-    </div>
-  `;
+    `).join("");
+    lucide.createIcons();
 }
 
-// Initialize on DOM ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
+function getPlatformIcon(p) {
+    const icons = { youtube: "youtube", twitter: "twitter", reddit: "message-square", instagram: "instagram", tiktok: "video", facebook: "facebook", linkedin: "linkedin", news: "newspaper" };
+    return icons[p] || "globe";
 }
 
+function startPlatformTour() {}
+// Tour logic removed
+
+function openMentionDrawer(m) {
+    const drawer = document.getElementById("mention-drawer");
+    const overlay = document.getElementById("drawer-overlay");
+    if (!drawer || !overlay) return;
+
+    document.getElementById("drawer-text").textContent = m.text;
+    document.getElementById("drawer-channel").textContent = m.channel;
+    const sEl = document.getElementById("drawer-sentiment");
+    if (sEl) {
+        sEl.textContent = m.sentimentLabel;
+        sEl.className = `text-sm font-black uppercase tracking-widest ${m.sentimentLabel === 'positive' ? 'text-emerald-500' : (m.sentimentLabel === 'negative' ? 'text-rose-500' : 'text-slate-400')}`;
+    }
+    const eEl = document.getElementById("drawer-emotion");
+    if (eEl) eEl.textContent = m.emotion || "neutral";
+    
+    const iEl = document.getElementById("drawer-intent");
+    if (iEl) iEl.textContent = (m.intent || "general").replace("_", " ");
+    
+    const aEl = document.getElementById("drawer-aspect");
+    if (aEl) aEl.textContent = (m.aspect || "general").replace("_", " ");
+    
+    const rEl = document.getElementById("drawer-reach");
+    if (rEl) rEl.textContent = (m.reach || 0).toLocaleString();
+    
+    const fEl = document.getElementById("drawer-influence");
+    if (fEl) fEl.textContent = `${m.author_influence || 0}/100`;
+    
+    const cEl = document.getElementById("drawer-crisis");
+    if (cEl) {
+        cEl.textContent = m.crisis_score || 0;
+        cEl.className = `text-sm font-black ${m.crisis_score > 70 ? 'text-rose-500' : (m.crisis_score > 40 ? 'text-orange-500' : 'text-slate-900')}`;
+    }
+    document.getElementById("drawer-url").href = m.url || "#";
+
+    const topicsList = document.getElementById("drawer-topics");
+    if (m.keybert_topics && topicsList) {
+        const topics = Array.isArray(m.keybert_topics) ? m.keybert_topics : m.keybert_topics.split(",");
+        topicsList.innerHTML = topics.map(t => `<span class="px-2 py-1 bg-white/5 text-slate-300 text-[10px] font-bold rounded-md border border-white/10">${t.trim()}</span>`).join("");
+    }
+
+    drawer.classList.remove("translate-x-full");
+    overlay.classList.remove("hidden");
+}
+
+function renderCharts(mentions) {
+    const trendCtx = document.getElementById("trend-chart")?.getContext("2d");
+    const donutCtx = document.getElementById("donut-chart")?.getContext("2d");
+    
+    if (!trendCtx || !donutCtx) return;
+
+    if (sentimentChart) sentimentChart.destroy();
+    
+    const countsByDay = {};
+    mentions.forEach(m => {
+        const date = new Date(m.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        countsByDay[date] = (countsByDay[date] || 0) + 1;
+    });
+    
+    const labels = Object.keys(countsByDay).sort((a,b) => new Date(a) - new Date(b)).slice(-10);
+    const data = labels.map(l => countsByDay[l]);
+
+    sentimentChart = new Chart(trendCtx, {
+        type: state.chartType || "bar",
+        data: {
+            labels,
+            datasets: [{
+                label: "Mentions",
+                data,
+                backgroundColor: "#4F46E5",
+                borderColor: "#4F46E5",
+                borderRadius: 12,
+                barThickness: 20,
+                tension: 0.4,
+                fill: state.chartType === 'line'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { 
+                y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.03)" }, ticks: { color: "#94A3B8", font: { size: 10, weight: '700' } }, border: { display: false } },
+                x: { grid: { display: false }, ticks: { color: "#94A3B8", font: { size: 10, weight: '700' } }, border: { display: false } } 
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    if (distributionChart) distributionChart.destroy();
+    
+    const pos = mentions.filter(m => m.sentimentLabel === "positive").length;
+    const neu = mentions.filter(m => m.sentimentLabel === "neutral").length;
+    const neg = mentions.filter(m => m.sentimentLabel === "negative").length;
+    const colors = {
+        positive: "#10B981",
+        neutral: "#94A3B8",
+        negative: "#F43F5E"
+    };
+
+    distributionChart = new Chart(donutCtx, {
+        type: "doughnut",
+        data: {
+            labels: ["Positive", "Neutral", "Negative"],
+            datasets: [{
+                data: [pos, neu, neg],
+                backgroundColor: [colors.positive, colors.neutral, colors.negative],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "75%",
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    els.distLegend.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full" style="background:${colors.positive}"></div>
+                <span class="text-xs font-black text-slate-900">Positive</span>
+            </div>
+            <span class="text-xs font-black text-emerald-500">${pos}</span>
+        </div>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full" style="background:${colors.neutral}"></div>
+                <span class="text-xs font-black text-slate-900">Neutral</span>
+            </div>
+            <span class="text-xs font-black text-slate-400">${neu}</span>
+        </div>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full" style="background:${colors.negative}"></div>
+                <span class="text-xs font-black text-slate-900">Negative</span>
+            </div>
+            <span class="text-xs font-black text-rose-500">${neg}</span>
+        </div>
+    `;
+}
+
+function renderEmotions() {
+    const container = document.getElementById("emotion-bars");
+    if (!container) return;
+    
+    // Mocking emotion distribution for the current mentions
+    const emotions = [
+        { label: "Joy/Trust", value: 45, color: "#10B981" },
+        { label: "Surprise", value: 25, color: "#06B6D4" },
+        { label: "Anticipation", value: 20, color: "#6366F1" },
+        { label: "Anger/Frustration", value: 10, color: "#F43F5E" }
+    ];
+    
+    container.innerHTML = emotions.map(e => `
+        <div class="space-y-2">
+            <div class="flex justify-between items-end">
+                <span class="text-xs font-black text-slate-900 uppercase tracking-tight">${e.label}</span>
+                <span class="text-[10px] font-black" style="color:${e.color}">${e.value}%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                <div class="h-full rounded-full transition-all duration-1000" style="width: ${e.value}%; background: ${e.color}"></div>
+            </div>
+        </div>
+    `).join("");
+}
+
+function renderPlatformPulse(mentions) {
+    const grid = document.getElementById("platform-grid");
+    if (!grid) return;
+    
+    const platforms = ["youtube", "twitter", "reddit", "instagram", "tiktok", "facebook", "linkedin", "news"];
+    const stats = platforms.map(p => {
+        const ms = mentions.filter(m => m.channel === p);
+        const count = ms.length;
+        const pos = ms.filter(m => m.sentimentLabel === "positive").length;
+        const neg = ms.filter(m => m.sentimentLabel === "negative").length;
+        const score = count ? Math.round(((pos - neg) / count) * 100) : 0;
+        return { p, count, score };
+    });
+    
+    grid.innerHTML = stats.map(s => `
+        <div class="platform-card">
+            <i data-lucide="${getPlatformIcon(s.p)}" class="w-5 h-5 text-slate-400 mx-auto mb-3"></i>
+            <p class="text-xs font-black text-slate-900 mb-1">${s.count}</p>
+            <p class="text-[9px] font-black tracking-widest uppercase ${s.score > 0 ? 'text-emerald-500' : (s.score < 0 ? 'text-rose-500' : 'text-slate-400')}">${s.score > 0 ? '+' : ''}${s.score}%</p>
+        </div>
+    `).join("");
+    lucide.createIcons();
+}
+
+function renderCrisis(alerts) {
+    const list = document.getElementById("crisis-alerts-list");
+    if (!list) return;
+    
+    list.innerHTML = alerts.length ? alerts.map(a => `
+        <div class="crisis-card slide-in">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[9px] font-black px-3 py-1 bg-rose-500/10 text-rose-600 border border-rose-500/20 rounded-full uppercase tracking-widest">${a.type.replace("_", " ")}</span>
+                <span class="text-[10px] font-bold text-slate-400">${new Date(a.created_at).toLocaleDateString()}</span>
+            </div>
+            <h4 class="text-base font-black text-slate-900 mb-2">Critical Risk Detected: ${a.risk_score}/100</h4>
+            <p class="text-sm text-slate-600 leading-relaxed mb-6 font-medium">${a.summary}</p>
+            <div class="bg-indigo-600 rounded-2xl p-5 shadow-lg shadow-indigo-100">
+                <p class="text-[9px] font-black text-white/60 uppercase tracking-widest mb-2">Recommended Strategy</p>
+                <p class="text-sm text-white font-bold leading-snug">${a.recommended_action}</p>
+            </div>
+        </div>
+    `).join("") : '<div class="text-center py-20 text-slate-400 text-[10px] font-black uppercase tracking-widest col-span-full">✅ All signals nominal. No active crisis detected.</div>';
+}
+
+function renderCompetitors(data) {
+    const grid = document.getElementById("competitor-grid");
+    if (!grid) return;
+    
+    grid.innerHTML = Object.entries(data).map(([name, d]) => `
+        <div class="flex items-center gap-6 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center font-black text-slate-900 text-sm shadow-sm border border-slate-100">${name[0]}</div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-black text-slate-900">${name}</p>
+                    <p class="text-[10px] font-black ${d.sentiment === 'positive' ? 'text-emerald-500' : 'text-rose-500'} uppercase tracking-widest">${d.positiveRatio}% Positive</p>
+                </div>
+                <div class="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                    <div class="h-full ${d.sentiment === 'positive' ? 'bg-emerald-500' : 'bg-rose-500'}" style="width:${d.positiveRatio}%"></div>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-sm font-black text-slate-900">${d.mentions}</p>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Signals</p>
+            </div>
+        </div>
+    `).join("");
+}
+
+function renderTrends(trends) {
+    const grid = document.getElementById("trends-grid");
+    if (!grid) return;
+    
+    grid.innerHTML = trends.map(t => `
+        <div class="flex items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+            <i data-lucide="${t.velocity === 'rising' ? 'trending-up' : (t.velocity === 'falling' ? 'trending-down' : 'minus')}" class="w-3.5 h-3.5 ${t.velocity === 'rising' ? 'text-emerald-500' : (t.velocity === 'falling' ? 'text-rose-500' : 'text-slate-400')}"></i>
+            <span class="ml-2 text-sm font-bold text-slate-900">${t.topic}</span>
+            <span class="ml-auto text-xs font-black text-slate-400">${t.mentions}</span>
+        </div>
+    `).join("");
+    lucide.createIcons();
+}
+
+// Sensitivity management
+let sentimentThreshold = 0.10;
+function processMentionsByThreshold() {
+    state.rawMentions.forEach(m => {
+        const score = m.vader_score || 0;
+        m.sentimentLabel = score >= sentimentThreshold ? "positive" : (score <= -sentimentThreshold ? "negative" : "neutral");
+    });
+}
+
+const sensSlider = document.getElementById("sens-slider");
+const sensVal = document.getElementById("sens-val");
+if (sensSlider) {
+    sensSlider.addEventListener("input", (e) => {
+        sentimentThreshold = parseFloat(e.target.value);
+        if (sensVal) sensVal.textContent = sentimentThreshold.toFixed(2);
+        processMentionsByThreshold();
+        render();
+    });
+}
+
+init();

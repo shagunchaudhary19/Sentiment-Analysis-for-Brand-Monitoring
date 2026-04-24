@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import sqlite3
 from data_pipeline.scraper import fetch_youtube_comments, fetch_news_mentions
 from data_pipeline.reddit_scraper import fetch_reddit_comments
 from data_pipeline.instagram_scraper import fetch_instagram_mentions
@@ -83,75 +84,86 @@ def run_pipeline(targets: list, output_file: str = "dashboard/data/processed_men
     print("4. Running Sentiment Analysis...")
     df = analyze_dataframe(df, text_column="processed_text")
     
-    try:
-        from alerts.notifier import check_for_alerts
-        check_for_alerts(df)
-    except ImportError:
-        pass
-    
     # 5. Topic Extraction
     print("5. Extracting Topics (KeyBERT)...")
     df['keybert_topics'] = extract_keybert_topics(df['processed_text'].tolist(), top_n=3)
     
     print("   Extracting Topics (LDA)...")
-    lda_topics = build_lda_model(df['processed_text'].tolist(), num_topics=3, num_words=4)
-    print("LDA Global Topics:", lda_topics)
+    try:
+        lda_topics = build_lda_model(df['processed_text'].tolist(), num_topics=3, num_words=4)
+        print("LDA Global Topics:", lda_topics)
+    except Exception as e:
+        print(f"LDA Error: {e}")
     
-    # 6. Save Data
+    # 6. Save Data (CSV/JSON)
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    
-    # CSV export for PowerBI/Tableau
     csv_file = output_file.replace(".json", ".csv")
     df.to_csv(csv_file, index=False)
     print(f"\nSaved CSV export to {csv_file}")
-    
-    # JSON export (kept for backwards compatibility)
     df.to_json(output_file, orient='records', indent=2)
     print(f"Saved JSON export to {output_file}")
 
     # 7. Database Persistence
-    import sqlite3
     db_path = "database/mentions.db"
+    print(f"\n7. Persisting {len(df)} records to SQLite database...")
     try:
         conn = sqlite3.connect(db_path)
-        # Using itertuples for faster DB insertion
+        count = 0
         for row in df.itertuples():
-            conn.execute('''
-                INSERT OR REPLACE INTO mentions (
-                    id, brand, channel, text, author, published_at, reach, vader_score, vader_label, url
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                str(getattr(row, 'id', '')),
-                getattr(row, 'brand', 'Unknown'),
-                getattr(row, 'channel', 'Unknown'),
-                getattr(row, 'text', ''),
-                getattr(row, 'author', 'Unknown'),
-                str(getattr(row, 'published_at', '')),
-                int(getattr(row, 'reach', 0)),
-                float(getattr(row, 'vader_score', 0.0)),
-                str(getattr(row, 'vader_label', 'neutral')),
-                getattr(row, 'url', '')
-            ))
+            try:
+                conn.execute('''
+                    INSERT OR REPLACE INTO mentions (
+                        id, brand, channel, text, author, author_followers, author_influence,
+                        published_at, reach, likes, shares, comments,
+                        vader_score, vader_label, confidence, emotion, intent, aspect,
+                        crisis_score, crisis_flag, language, geo_location, url, keybert_topics, ai_summary
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    str(getattr(row, 'id', f"m-{getattr(row, 'brand', 'unk')}-{count}")),
+                    getattr(row, 'brand', 'Unknown'),
+                    getattr(row, 'channel', 'Unknown'),
+                    getattr(row, 'text', ''),
+                    getattr(row, 'author', 'Unknown'),
+                    int(getattr(row, 'author_followers', 0)),
+                    float(getattr(row, 'author_influence', 0.0)),
+                    str(getattr(row, 'published_at', '')),
+                    int(getattr(row, 'reach', 0)),
+                    int(getattr(row, 'likes', 0)),
+                    int(getattr(row, 'shares', 0)),
+                    int(getattr(row, 'comments', 0)),
+                    float(getattr(row, 'vader_score', 0.0)),
+                    str(getattr(row, 'vader_label', 'neutral')),
+                    float(getattr(row, 'confidence', 0.5)),
+                    str(getattr(row, 'emotion', 'neutral')),
+                    str(getattr(row, 'intent', 'neutral_mention')),
+                    str(getattr(row, 'aspect', 'general')),
+                    int(getattr(row, 'crisis_score', 0)),
+                    int(getattr(row, 'crisis_flag', 0)),
+                    str(getattr(row, 'language', 'en')),
+                    str(getattr(row, 'geo_location', 'Global')),
+                    getattr(row, 'url', ''),
+                    str(getattr(row, 'keybert_topics', '')),
+                    "AI Analysis via ML Pipeline v2"
+                ))
+                count += 1
+            except Exception as e:
+                print(f"   Error saving record: {e}")
+                
         conn.commit()
-        print(f"✅ Successfully persisted {len(df)} records to SQLite database ({db_path}).")
         conn.close()
+        print(f"✅ ML Synchronized: {count} records analyzed and saved to Database.")
     except Exception as e:
-        print(f"❌ Error persisting to database: {e}")
-
-    # Print channel breakdown summary
-    if "channel" in df.columns:
-        print("\n--- Platform Breakdown ---")
-        print(df["channel"].value_counts().to_string())
-    
-    print("\n--- Pipeline Complete ---")
+        print(f"❌ Database error: {e}")
 
 if __name__ == "__main__":
-    # Define tracking targets
-    # youtube_query: search term for YouTube Search API
-    # reddit_kw:     keyword to search on Reddit
-    # ig_keyword:    hashtag/keyword for Instagram Graph API
-    # fb_keyword:    keyword to filter Facebook Page posts
     targets = [
+        {
+            "brand": "Antigravity",
+            "youtube_query": "Antigravity Fitness Yoga Workout",
+            "reddit_kw": "Antigravity",
+            "ig_keyword": "AntigravityFitness",
+            "fb_keyword": "AntigravityYoga",
+        },
         {
             "brand": "Apple",
             "youtube_query": "Apple iPhone review 2024",
@@ -161,52 +173,10 @@ if __name__ == "__main__":
         },
         {
             "brand": "Samsung",
-            "youtube_query": "Samsung Galaxy review 2024",
-            "reddit_kw": "Galaxy",
-            "ig_keyword": "Samsung",
-            "fb_keyword": "Galaxy"
-        },
-        {
-            "brand": "Google",
-            "youtube_query": "Google Pixel review 2024",
-            "reddit_kw": "Pixel",
-            "ig_keyword": "GooglePixel",
-            "fb_keyword": "Pixel"
-        },
-        {
-            "brand": "Microsoft",
-            "youtube_query": "Microsoft Surface Laptop review 2024",
-            "reddit_kw": "Surface",
-            "ig_keyword": "Surface",
-            "fb_keyword": "Surface"
-        },
-        {
-            "brand": "Sony",
-            "youtube_query": "Sony PlayStation 5 PS5 review",
-            "reddit_kw": "PS5",
-            "ig_keyword": "PlayStation5",
-            "fb_keyword": "PS5"
-        },
-        {
-            "brand": "Tesla",
-            "youtube_query": "Tesla Model Y review 2024",
-            "reddit_kw": "Tesla",
-            "ig_keyword": "TeslaModelY",
-            "fb_keyword": "ModelY"
-        },
-        {
-            "brand": "Amazon",
-            "youtube_query": "Amazon Echo Alexa review",
-            "reddit_kw": "Alexa",
-            "ig_keyword": "Kindle",
-            "fb_keyword": "Echo"
-        },
-        {
-            "brand": "Meta",
-            "youtube_query": "Meta Quest 3 VR review",
-            "reddit_kw": "MetaQuest",
-            "ig_keyword": "Quest3",
-            "fb_keyword": "MetaQuest"
+            "youtube_query": "Samsung Galaxy S24 Ultra review",
+            "reddit_kw": "Samsung",
+            "ig_keyword": "SamsungGalaxy",
+            "fb_keyword": "SamsungMobile"
         }
     ]
     run_pipeline(targets, output_file="dashboard/data/processed_mentions.json")

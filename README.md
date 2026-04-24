@@ -1,95 +1,84 @@
-# 🚀 Brand Sentiment Monitor — AI-Powered SaaS Dashboard
+# 🚀 BrandWatch Intelligence — AI-Powered Brand Monitoring
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/shagunchaudhary19/Sentiment-Analysis-for-Brand-Monitoring/blob/main/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/shagunchaudhary19/Sentiment-Analysis-for-Brand-Monitoring/issues)
 
-A premium, state-of-the-art **Brand Sentiment Analysis** platform designed for modern marketing teams. Monitor brand health in real-time across YouTube, Reddit, Instagram, and Facebook using advanced AI insights and human-centric design.
-
-![Landing Page Preview](assets/landing_light.png)
+A premium, state-of-the-art **Brand Sentiment Analysis** platform designed for modern marketing teams. Monitor brand health in real-time across YouTube, Reddit, Instagram, and News using advanced NLP insights and a stunning high-fidelity dashboard.
 
 ---
 
 ## ✨ Features
 
-### 🧠 AI Brand Intelligence
-Go beyond simple numbers. Our **AI Intelligence Panel** summarizes exactly *what* people are saying and *how* to respond.
-- **Dynamic Summarization**: Automated insight bullets based on live sentiment volume.
-- **Strategic Recommendations**: AI-driven advice for engagement or amplification.
+### 🧠 AI Neural Insights
+Go beyond simple numbers. Our **AI Brain Analysis** module uses advanced NLP to summarize exactly *what* people are saying and generates strategic action plans.
+- **Deep Sentiment Triage**: Positive, Negative, and Neutral classification with high-contrast color-coded indicators.
+- **Emotion Detection**: Track Joy, Anger, Trust, and more to understand the emotional pulse of your customers.
+- **Topic Extraction**: Automated keyword extraction and categorization.
 
-### 🌓 Premium Dual-Mode UI
-- **Pure White Mode**: A high-end, clean aesthetic for daylight professional work.
-- **Midnight Dark Mode**: A sleek, high-contrast dark theme for deep focus and monitoring.
-- **Glassmorphism & Micro-animations**: Smooth transitions, shimmering skeletons, and modern gradients.
+### 🌓 Premium SaaS Interface
+- **Executive Dashboard**: A sleek, high-fidelity light theme (consistent with modern SaaS branding) with glassmorphism, backdrop blurs, and micro-animations.
+- **Intelligence Mix**: Real-time sentiment donut charts with dynamic legends.
+- **Crisis Radar**: Early warning system for negative sentiment spikes and reputational risk.
+- **Settings & Session Management**: Secure logout and account switching functionality.
 
-### 📊 Advanced Analytics
-- **Multi-Brand Support**: Seamlessly switch between Apple, Samsung, Google, and more.
-- **Competitive Mode**: Side-by-side benchmarking (A vs. B) to track market share.
-- **Trend Charts**: Interactive `Chart.js` visualizations for positive vs. negative sentiment flow.
-- **High-Impact Mention Feed**: Real-time triage of the most influential posts.
+### 📊 Professional Analytics
+- **Multi-Brand Monitoring**: Seamlessly switch between tracked brands (Antigravity, Apple, Samsung, etc.).
+- **Competitor Benchmarking**: Side-by-side sentiment analysis to track market positioning.
+- **Mentions Feed**: Deep-dive into specific mentions with platform-specific context and engagement metrics.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Vanilla JS (ES6+), Tailwind CSS (3.x), Phosphor Icons, Chart.js.
-- **Backend**: Node.js (Express), SQLite3 (Persistence), axios.
-- **Data Pipeline**: Python 3.11, Pandas, VADER Sentiment, KeyBERT, spaCy.
+- **Frontend**: Vanilla JS (ES6+), Tailwind CSS (3.x), Lucide Icons, Chart.js.
+- **Backend API**: Node.js (Express), JWT Auth, SQLite3 (Persistence), Cookie-based sessions.
+- **Data Engine**: Python (optional for advanced analytics), NLP-driven sentiment scoring.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### 1. Prerequisites
 - [Node.js](https://nodejs.org/) (v18+)
-- [Python](https://www.python.org/) (v3.10+)
 
-### 2. Installation & Setup
+### 2. Installation
 ```bash
 # Clone the repository
 git clone https://github.com/shagunchaudhary19/Sentiment-Analysis-for-Brand-Monitoring.git
 cd Sentiment-Analysis-for-Brand-Monitoring
 
-# Install dependencies
+# Install Node.js dependencies
 npm install
-pip install -r requirements.txt
 ```
 
-### 3. Initialize the Database
+### 3. Initialize & Seed
 ```bash
-python init_db.py
+# Setup Database Schema
+node setup_db.js
+
+# Seed with Production-Ready Data
+node seed_data.js
 ```
 
 ### 4. Run the Platform
 ```bash
-# Start the Backend & Server
-npm run start
+# Start the Main Backend
+node server.js
 ```
-Open **`http://localhost:4001`** to see the landing page. Navigation to `/dashboard` is handled automatically.
+The application will be available at `http://localhost:4001`.
+
+### 🔑 User Access
+You can create a new account via the **Sign Up** page or use the pre-seeded data by logging in with:
+- **Email**: `admin@brandwatch.ai`
+- **Password**: `admin123`
 
 ---
 
-## 📸 Dashboard Preview
-
-![Dashboard SaaS View](assets/dashboard_dark.png)
-
----
-
-## 🗺️ Roadmap
-- [x] **Phase 1**: SQLite Migration for scalable data storage.
-- [x] **Phase 2**: AI Insights Panel integration.
-- [ ] **Phase 3**: Automated Email/Slack alerting system.
-- [ ] **Phase 4**: Expanded support for TikTok and LinkedIn via Official Graph APIs.
-
----
-
-## 🤝 Contributing
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## 🗺️ Project Status
+- [x] **Light Theme Migration**: Fully unified UI with SaaS aesthetic.
+- [x] **AI Insights Panel**: Advanced NLP report generation.
+- [x] **Session Management**: Secure login, logout, and settings.
+- [x] **Real-time Pipeline**: Dynamic mention tracking and filtering.
 
 ---
 
@@ -97,4 +86,4 @@ Contributions are what make the open source community such an amazing place to l
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
-Created with ❤️ by [Shagun Chaudhary](https://github.com/shagunchaudhary19)
+Created with ❤️ by Antigravity AI

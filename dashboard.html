@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Dashboard | BrandWatch AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@0.418.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:"#4F46E5",secondary:"#06B6D4",danger:"#F43F5E"},fontFamily:{sans:["Inter","sans-serif"]}}}}</script>
+<style>
+*{font-family:"Inter",sans-serif}
+body{background:#F8FAFC;color:#334155}
+.glass{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.05);backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,0.03)}
+.glass-bright{background:rgba(79,70,229,0.05);border:1px solid rgba(79,70,229,0.1)}
+.glow{box-shadow:0 10px 30px rgba(79,70,229,0.08)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px}
+.badge-pos{background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.2)}
+.badge-neg{background:rgba(244,63,94,0.1);color:#E11D48;border:1px solid rgba(244,63,94,0.2)}
+.badge-neu{background:rgba(71,85,105,0.05);color:#475569;border:1px solid rgba(71,85,105,0.2)}
+.sidebar-link{transition:all 0.2s ease}.sidebar-link.active{background:rgba(79,70,229,0.1);color:#4F46E5}
+.sidebar-link.active i{color:#4F46E5}
+.kpi-card{padding:1.5rem;border-radius:1.5rem;transition:transform 0.3s ease;background:white;border:1px solid rgba(0,0,0,0.05);box-shadow:0 4px 15px rgba(0,0,0,0.02)}.kpi-card:hover{transform:translateY(-2px)}
+.brain-modal{position:fixed;inset:0;background:rgba(15,23,42,0.4);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.brain-content{background:white;width:100%;max-width:48rem;max-height:90vh;border-radius:2.5rem;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.05)}
+.mention-card{border-bottom:1px solid rgba(0,0,0,0.03);transition:background 0.2s}.mention-card:hover{background:rgba(79,70,229,0.02)}
+.trend-tag{padding:0.5rem 1rem;background:white;border:1px solid rgba(0,0,0,0.05);border-radius:1rem;font-size:11px;font-weight:700;color:#1E293B;display:flex;align-items:center;gap:0.5rem;box-shadow:0 2px 5px rgba(0,0,0,0.02)}
+.crisis-card{padding:1.25rem;background:rgba(244,63,94,0.03);border:1px solid rgba(244,63,94,0.1);border-radius:1.5rem}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.slide-in{animation:slideUp 0.4s ease forwards}
+.platform-card{background:white;border:1px solid rgba(0,0,0,0.05);border-radius:1.25rem;padding:1rem;text-align:center;transition:all 0.2s}.platform-card:hover{border-color:rgba(79,70,229,0.2);box-shadow:0 10px 15px rgba(0,0,0,0.02)}
+</style>
+</head>
+<body class="flex h-screen overflow-hidden bg-[#F8FAFC]">
+
+<!-- SIDEBAR -->
+<aside class="w-20 lg:w-64 flex flex-col bg-white border-r border-slate-200 z-40">
+  <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200"><i data-lucide="bar-chart-3" class="text-white w-6 h-6"></i></div>
+    <span class="text-lg font-black text-slate-900 hidden lg:block tracking-tight">BrandWatch</span>
+  </div>
+  
+  <nav class="flex-1 p-4 space-y-2">
+    <button id="nav-overview" data-section="overview" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span class="hidden lg:block">Overview</span>
+    </button>
+    <button id="nav-mentions" data-section="mentions" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50">
+      <i data-lucide="message-square" class="w-5 h-5"></i><span class="hidden lg:block">Mentions</span>
+    </button>
+    <button id="nav-crisis" data-section="crisis" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 relative">
+      <i data-lucide="shield-alert" class="w-5 h-5"></i><span class="hidden lg:block">Crisis Radar</span>
+      <span id="crisis-badge" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-rose-500 text-[10px] text-white rounded-full flex items-center justify-center hidden border-2 border-white">0</span>
+    </button>
+    <button id="nav-competitors" data-section="competitors" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50">
+      <i data-lucide="users" class="w-5 h-5"></i><span class="hidden lg:block">Competitors</span>
+    </button>
+    <button id="nav-trends" data-section="trends" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50">
+      <i data-lucide="trending-up" class="w-5 h-5"></i><span class="hidden lg:block">Market Trends</span>
+    </button>
+  </nav>
+
+  <div id="brand-sidebar" class="px-4 py-4 border-t border-slate-100 flex flex-wrap gap-2">
+    <!-- Brands icons here -->
+  </div>
+
+  <div class="p-4 border-t border-slate-100">
+    <button id="settings-btn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all">
+      <i data-lucide="settings" class="w-5 h-5"></i><span class="hidden lg:block">Settings</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="flex-1 overflow-y-auto relative">
+  <!-- Top Header -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex items-center justify-between">
+    <div>
+      <h1 id="page-title" class="text-xl font-black text-slate-900 tracking-tight">Intelligence Overview</h1>
+      <p id="page-sub" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time sentiment monitoring</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+        <select id="brand-select" class="bg-transparent border-none text-xs font-bold text-slate-700 outline-none px-2 py-1 min-w-[140px] cursor-pointer">
+          <option>Loading...</option>
+        </select>
+        <button id="add-brand-btn" class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all"><i data-lucide="plus" class="w-4 h-4"></i></button>
+      </div>
+      <div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+      <button id="ai-brain-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+        <i data-lucide="brain" class="w-4 h-4"></i> AI Brain
+      </button>
+      <button id="live-sync-btn" class="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 transition-all">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+      <div class="flex items-center gap-3 bg-slate-50 pl-1 pr-3 py-1 rounded-xl border border-slate-200">
+        <div id="user-avatar" class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">U</div>
+        <span id="user-name" class="text-xs font-bold text-slate-700">User</span>
+        <button id="settings-btn" class="p-1.5 text-slate-400 hover:text-slate-900 transition-all"><i data-lucide="settings" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settings-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden p-4">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="settings-close-overlay"></div>
+    <div class="relative z-10 w-full max-w-xs bg-white rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100">
+      <div class="p-6 border-b border-slate-50 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><i data-lucide="user" class="w-5 h-5"></i></div>
+        <div>
+          <h3 class="text-sm font-black text-slate-900">Account Settings</h3>
+          <p class="text-[9px] text-slate-400 font-bold uppercase">Manage your session</p>
+        </div>
+      </div>
+      <div class="p-2">
+        <button onclick="handleSwitchAccount()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all">
+          <i data-lucide="users" class="w-4 h-4"></i> Switch Account
+        </button>
+        <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-50 transition-all">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-8 max-w-7xl mx-auto">
+    <!-- AI INSIGHT BANNER (Hidden by default) -->
+    <div id="ai-banner" class="hidden mb-8 p-6 glass-bright rounded-[2rem] border-indigo-200 shadow-lg shadow-indigo-50/50 flex items-start gap-4 animate-pulse">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shrink-0"><i data-lucide="sparkles" class="w-6 h-6"></i></div>
+        <div class="flex-1"><p id="ai-banner-text" class="text-sm font-bold text-slate-700 leading-relaxed"></p></div>
+    </div>
+    
+    <!-- OVERVIEW SECTION -->
+    <div id="section-overview" class="space-y-8">
+      
+      <!-- KPI CARDS -->
+      <div id="kpi-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <!-- CHARTS ROW -->
+      <div id="overview-charts-1" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 glass rounded-[2.5rem] p-10">
+          <div class="flex items-center justify-between mb-10">
+            <div>
+              <h3 class="text-base font-black text-slate-900">Sentiment Velocity</h3>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Global mention trend</p>
+            </div>
+            <div id="date-range-toggle" class="flex p-1 bg-slate-100 rounded-xl border border-slate-200">
+              <button data-range="24h" class="px-5 py-2 rounded-lg text-[10px] font-black bg-white shadow-sm text-indigo-600">24H</button>
+              <button data-range="7d" class="px-5 py-2 rounded-lg text-[10px] font-black text-slate-500 hover:text-slate-900">7D</button>
+              <button data-range="30d" class="px-5 py-2 rounded-lg text-[10px] font-black text-slate-500 hover:text-slate-900">30D</button>
+            </div>
+          </div>
+          <div class="h-[350px]"><canvas id="trend-chart"></canvas></div>
+        </div>
+
+        <div class="glass rounded-[2.5rem] p-10 flex flex-col items-center">
+          <h3 class="text-base font-black text-slate-900 self-start">Intelligence Mix</h3>
+          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 mb-10 self-start">Sentiment distribution</p>
+          <div class="relative w-full aspect-square max-w-[240px] mb-10">
+            <canvas id="donut-chart"></canvas>
+            <div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
+              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confidence</span>
+              <span class="text-3xl font-black text-slate-900">High</span>
+            </div>
+          </div>
+          <div id="dist-legend" class="w-full space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- EMOTIONS & PULSE -->
+      <div id="overview-charts-2" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="glass rounded-[2.5rem] p-10">
+          <h3 class="text-base font-black text-slate-900 mb-1">Emotion Spectrum</h3>
+          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-10">NLP-Powered Audience Reaction</p>
+          <div id="emotion-bars" class="space-y-6"></div>
+        </div>
+        <div class="glass rounded-[2.5rem] p-10">
+          <h3 class="text-base font-black text-slate-900 mb-1">Platform Pulse</h3>
+          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-10">Volume Frequency per Channel</p>
+          <div id="platform-grid" class="grid grid-cols-4 gap-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENTIONS SECTION -->
+    <div id="section-mentions" class="hidden glass rounded-[2.5rem] overflow-hidden">
+      <div class="p-8 border-b border-slate-100 flex items-center justify-between">
+        <div><h3 class="text-base font-black text-slate-900">Mentions Feed</h3><p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Verbatim platform signals</p></div>
+        <div class="flex items-center gap-3">
+          <input id="mentions-search" placeholder="Filter mentions..." class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 outline-none w-64 focus:ring-2 focus:ring-indigo-100 transition-all">
+          <select id="mentions-sort" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 font-bold outline-none cursor-pointer">
+            <option value="latest">Latest First</option><option value="impact">High Reach</option><option value="crisis">Risk First</option>
+          </select>
+        </div>
+      </div>
+      <div id="mentions-list" class="divide-y divide-slate-50 min-h-[400px]"></div>
+      <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <button id="mentions-prev" class="px-6 py-2 rounded-xl text-xs font-black bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30">Previous</button>
+        <span id="mentions-pagination" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page 1 of 1</span>
+        <button id="mentions-next" class="px-6 py-2 rounded-xl text-xs font-black bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30">Next Page</button>
+      </div>
+    </div>
+
+    <!-- CRISIS SECTION -->
+    <div id="section-crisis" class="hidden space-y-8">
+      <div class="flex items-center justify-between">
+        <div><h3 class="text-xl font-black text-slate-900">Crisis Radar</h3><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Reputation threat detection</p></div>
+        <div class="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl border border-rose-100 text-[10px] font-black uppercase">Live Monitoring Active</div>
+      </div>
+      <div id="crisis-alerts-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      <div class="glass rounded-[2.5rem] p-10">
+        <h4 class="text-sm font-black text-slate-900 mb-8 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-rose-500"></i> High-Risk Vectors (Score > 70)</h4>
+        <div id="high-risk-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+    </div>
+
+    <!-- COMPETITORS SECTION -->
+    <div id="section-competitors" class="hidden space-y-8">
+       <div><h3 class="text-xl font-black text-slate-900">Competitor Intelligence</h3><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Market share & sentiment comparison</p></div>
+       <div id="competitor-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- TRENDS SECTION -->
+    <div id="section-trends" class="hidden space-y-8">
+      <div><h3 class="text-xl font-black text-slate-900">Market Trends</h3><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">NLP-detected conversation clusters</p></div>
+      <div id="trends-grid" class="flex flex-wrap gap-4"></div>
+      <div class="glass rounded-[2.5rem] p-10"><div id="trends-table" class="space-y-4"></div></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- AI BRAIN MODAL -->
+<div id="brain-modal" class="brain-modal hidden">
+  <div class="brain-content">
+    <div class="flex items-center justify-between p-8 border-b border-slate-100">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-100"><i data-lucide="brain" class="w-6 h-6 text-white"></i></div>
+        <div><h2 class="text-lg font-black text-slate-900">Neural Intelligence Report</h2><p class="text-[10px] text-slate-400 font-bold uppercase">Multi-vector AI synthesis</p></div>
+      </div>
+      <button id="brain-close" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div id="brain-content" class="p-8 overflow-y-auto" style="max-height: calc(90vh - 100px)">
+      <!-- AI content here -->
+    </div>
+  </div>
+</div>
+
+<!-- MENTION DRAWER -->
+<div id="drawer-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-50"></div>
+<div id="mention-drawer" class="fixed top-0 right-0 h-full w-full max-w-lg translate-x-full transition-transform duration-300 z-50 flex flex-col bg-white shadow-2xl border-l border-slate-100">
+  <div class="p-8 border-b border-slate-100 flex items-center justify-between bg-white">
+    <h3 class="font-black text-slate-900 text-lg">Signal Intelligence</h3>
+    <button id="drawer-close" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <div class="p-8 overflow-y-auto space-y-8 flex-1">
+    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+      <p id="drawer-text" class="text-base text-slate-700 leading-relaxed font-medium italic"></p>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm"><p class="text-[9px] font-black text-slate-400 uppercase mb-1">Source Platform</p><p id="drawer-channel" class="text-sm font-black text-slate-900 uppercase"></p></div>
+      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm"><p class="text-[9px] font-black text-slate-400 uppercase mb-1">NLP Sentiment</p><p id="drawer-sentiment" class="text-sm font-black"></p></div>
+      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm"><p class="text-[9px] font-black text-slate-400 uppercase mb-1">Detected Emotion</p><p id="drawer-emotion" class="text-sm font-black text-slate-700 capitalize"></p></div>
+      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm"><p class="text-[9px] font-black text-slate-400 uppercase mb-1">Public Reach</p><p id="drawer-reach" class="text-sm font-black text-slate-700"></p></div>
+      <!-- Hidden elements to satisfy JS dependencies -->
+      <div id="drawer-intent" class="hidden"></div>
+      <div id="drawer-aspect" class="hidden"></div>
+      <div id="drawer-influence" class="hidden"></div>
+      <div id="drawer-crisis" class="hidden"></div>
+    </div>
+    <div><p class="text-[9px] font-black text-slate-400 uppercase mb-4 tracking-widest">Topic Classification</p><div id="drawer-topics" class="flex flex-wrap gap-2"></div></div>
+    <a id="drawer-url" href="#" target="_blank" class="block w-full text-center py-4 rounded-2xl font-black text-sm text-white bg-indigo-600 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">Direct Engagement →</a>
+  </div>
+</div>
+
+<!-- BRAND ONBOARDING MODAL -->
+<div id="brand-onboard-modal" class="fixed inset-0 z-[150] flex items-center justify-center hidden p-4">
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" id="brand-onboard-close-overlay"></div>
+  <div class="relative z-10 w-full max-w-xl bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-200">
+    <div id="onboard-step-1" class="space-y-8">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100"><i data-lucide="search" class="w-6 h-6 text-white"></i></div>
+        <button id="brand-onboard-close" class="p-2 text-slate-400 hover:text-slate-900 transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="text-center">
+        <h2 class="text-2xl font-black text-slate-900">Initiate Brand Tracking</h2>
+        <p class="text-sm text-slate-500 font-medium">Global reconnaissance engine active. Enter brand name.</p>
+      </div>
+      <div class="relative">
+        <input id="onboard-brand-input" type="text" placeholder="e.g., Apple, Nike, Tesla..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 text-lg font-bold text-slate-900 outline-none focus:border-indigo-300 transition-all">
+        <button id="onboard-search-btn" class="absolute right-3 top-3 bottom-3 px-6 bg-indigo-600 text-white rounded-xl text-xs font-black hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">SCAN DATABASE</button>
+      </div>
+      <div id="onboard-searching" class="hidden text-center py-10">
+        <div class="w-10 h-10 border-2 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessing Neural Archive...</p>
+      </div>
+      <div id="onboard-result" class="hidden space-y-4">
+        <!-- Results Card -->
+        <div id="brand-result-card" class="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img id="onboard-logo" class="w-14 h-14 rounded-2xl bg-white border border-indigo-100 p-2 shadow-sm" src="" alt="logo">
+                <div>
+                    <h4 id="onboard-brand-name" class="text-lg font-black text-slate-900">Brand Name</h4>
+                    <span class="text-[10px] font-black px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded uppercase">Verified Data Source</span>
+                </div>
+            </div>
+            <button id="onboard-confirm-btn" class="px-8 py-4 bg-indigo-600 text-white rounded-2xl text-xs font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">TRACK THIS BRAND</button>
+        </div>
+        <div id="onboard-recommendations" class="space-y-2">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Exact Type Recommendations</p>
+            <div id="recommendations-list" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+      <div id="onboard-error" class="hidden text-center py-10 space-y-4">
+        <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500"><i data-lucide="alert-circle" class="w-8 h-8"></i></div>
+        <p class="text-sm font-bold text-slate-900">Search Failed: <span id="error-query" class="text-rose-500"></span></p>
+        <p class="text-xs text-slate-500">We couldn't locate this brand. Try one of our suggested matches above.</p>
+      </div>
+    </div>
+    <div id="onboard-step-2" class="hidden space-y-8 text-center py-10">
+        <div class="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-emerald-500 relative">
+            <i data-lucide="refresh-cw" class="w-10 h-10 animate-spin"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-black text-slate-900">Neural Core Syncing</h2>
+            <p class="text-sm text-slate-500 font-medium">Extracting platform mentions for <span id="sync-brand-name" class="text-indigo-600 font-bold"></span></p>
+        </div>
+        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden max-w-sm mx-auto">
+            <div id="sync-bar" class="h-full bg-indigo-600 transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <div class="flex items-center justify-center gap-2">
+            <span id="sync-per" class="text-xs font-black text-indigo-600">0%</span>
+            <span id="sync-status" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessing Neural Archive...</span>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="fixed bottom-8 right-8 z-[200] space-y-3 pointer-events-none"></div>
+
+<!-- LIBRARIES -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
