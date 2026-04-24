@@ -5,7 +5,9 @@
   "description": "Frontend dashboard and backend API for AI-based sentiment analysis and brand monitoring.",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "analyst-view": "streamlit run dashboard/app.py",
+    "data-pipeline": "python main.py"
   },
   "dependencies": {
     "axios": "^1.13.6",

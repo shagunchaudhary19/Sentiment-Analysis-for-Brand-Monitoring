@@ -61,11 +61,19 @@ node seed_data.js
 ```
 
 ### 4. Run the Platform
+
 ```bash
-# Start the Main Backend
-node server.js
+# Start the Main SaaS Dashboard (Port 4001)
+npm start
+
+# (Optional) Start the Streamlit Analyst View
+npm run analyst-view
+
+# (Optional) Start the Python Data Pipeline
+npm run data-pipeline
 ```
 The application will be available at `http://localhost:4001`.
+The Streamlit analyst view will be available at `http://localhost:8501`.
 
 ### 🔑 User Access
 You can create a new account via the **Sign Up** page or use the pre-seeded data by logging in with:
