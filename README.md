@@ -93,5 +93,4 @@ You can create a new account via the **Sign Up** page or use the pre-seeded data
 ## ⚖️ License
 Distributed under the MIT License. See `LICENSE` for more information.
 
----
-Created with ❤️ by Antigravity AI
+
